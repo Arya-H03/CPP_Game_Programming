@@ -5,7 +5,132 @@
 #include <iostream>
 #include <fstream>
 
+class MyShape
+{
+    sf::Shape* m_shape = nullptr;
+    std::string m_name;
+    std::array<float, 2> m_size;       // {width, height}
+    std::array<float, 2> m_speed; // {xSpeed, ySpeed}
+    std::array<float, 2> m_pos;   // {xPos, yPos}
+    std::array<int, 3> m_color;      // {r, g, b}
 
+public:
+
+    MyShape(std::string name, std::array<float, 2> size, std::array<float, 2> startSpeed, std::array<float, 2> startPos, std::array<int, 3> color)
+
+        : m_name(name), m_size(size), m_speed(startSpeed), m_pos(startPos), m_color(color)
+     {
+        if (m_name == "Circle")
+        {
+            m_shape = new sf::CircleShape(m_size[0],32);
+        }
+        else if (m_name == "Rectangle")
+        {
+            m_shape = new sf::RectangleShape({size[0],size[1]});
+        }
+        else
+        {
+            m_shape = nullptr;
+        }
+
+     }
+
+     sf::Shape* GetShape() const
+     {
+         if (m_shape != nullptr)
+         {
+             return m_shape;
+         }
+         else
+         {
+             std::cout << "Invalid shape was created with name " << m_name;
+             return nullptr;
+         }
+        
+     }
+
+     std::array <float,2> GetSpeed()
+     {
+         return m_speed;
+     }
+
+     std::array <float, 2> GetSize()
+     {
+         return m_size;
+     }
+
+     std::array <float, 2> GetPosition()
+     {
+         return m_pos;
+     }
+
+     std::array <int, 3> GetColor()
+     {
+         return m_color;
+     }
+
+     std::string GetName()
+     {
+         return m_name;
+     }
+
+     void ChangeSize(std::array<float, 2> newSize)
+     {
+         m_size = newSize;
+        
+     }
+
+     void ChangeSpeed(std::array<float, 2> newSpeed)
+     {
+         m_speed = newSpeed;
+     }
+
+     void ChangePosotion(std::array<float, 2> newPos)
+     {
+         m_pos = newPos;
+         m_shape->setPosition({ m_pos[0],m_pos[1] });
+     }
+
+     void ChangeColor(std::array<int, 3> newColor)
+     {
+         m_color = newColor;
+         m_shape->setFillColor(sf::Color(std::uint8_t(m_color[0] * 255), std::uint8_t(m_color[1] * 255), std::uint8_t(newColor[2] * 255)));
+     }
+
+     void MoveShape()
+     {
+         m_pos[0] += m_speed[0];
+         m_pos[1] += m_speed[1];
+         m_shape->setPosition({ m_pos[0], m_pos[1] });
+     }
+
+     void CheckForBounce(sf::RenderWindow *window, float* xSpeed, float* ySpeed)
+     {
+         if (m_shape->getGlobalBounds().getCenter().y - m_shape->getGlobalBounds().size.y / 2 <= 0)
+        {
+            *ySpeed *= -1;
+        }
+        if (m_shape->getGlobalBounds().getCenter().y + m_shape->getGlobalBounds().size.y / 2 >= window->getSize().y)
+        {
+            *ySpeed *= -1;
+        }
+
+        if (m_shape->getGlobalBounds().getCenter().x - m_shape->getGlobalBounds().size.x / 2 <= 0)
+        {
+            *xSpeed *= -1;
+        }
+        if (m_shape->getGlobalBounds().getCenter().x+ m_shape->getGlobalBounds().size.x / 2 >= window->getSize().x)
+        {
+            *xSpeed *= -1;
+        }
+     }
+
+     ~MyShape()
+     {
+         delete m_shape; // Prevent memory leak
+     }
+
+};
 
 
 int main()
@@ -31,10 +156,12 @@ int main()
     bool drawCircle = true;
     bool drawText = true;
 
-    sf::CircleShape circle(radius, segments);
-    circle.setPosition({10.0f, 10.0f});
+ 
 
-    sf::Font font;
+    MyShape shape("Circle", { 100, 100 }, { 1, 1 }, { 50, 50 }, { 1, 0, 0 }); // Red rectangle
+
+       /* const sf::Font font("arial.ttf");*/
+
 
     /*if (!font.openFromFile("file"))
     {
@@ -43,7 +170,9 @@ int main()
 
     }*/
 
-    //sf::Text text("Sampletext", font, 24);
+    /*sf::Text text(font,"Sampletext", 24);*/
+    
+    
 
     while (window.isOpen())
     {
@@ -68,22 +197,37 @@ int main()
         ImGui::Checkbox("Draw Text", &drawText);
         ImGui::SliderFloat("Radius", &radius, 0.0f, 100.0f);
         ImGui::SliderInt("Sides", &segments, 3, 64);
+        ImGui::SliderFloat("Xspeed", &xSpeed, -100.0f, 100.0f);
+        ImGui::SliderFloat("Yspeed", &ySpeed, -100.0f, 100.0f);
         ImGui::ColorEdit3("Color", c);
         //ImGui::InputText("Text", displayString, 255);
         ImGui::End();
 
-        circle.setPointCount(segments);
-        circle.setRadius(radius);
+        shape.ChangeSpeed({ xSpeed,ySpeed });
 
-        circle.setFillColor(sf::Color(std::uint8_t(c[0] * 255), std::uint8_t(c[1] * 255), std::uint8_t(c[2] * 255)));
+        shape.ChangeColor({ 0,1,1 });
 
-        circle.setPosition({ circle.getPosition().x + xSpeed, circle.getPosition().y + ySpeed });
+        shape.MoveShape();
+
+
+       /* text.setStyle(sf::Text::Bold);
+        text.setFillColor(sf::Color::Red);
+        text.setPosition({ 100.0f,100.0f });*/
+
+        
+
+        shape.CheckForBounce(&window,&xSpeed,&ySpeed);
+        
+        
 
         window.clear();
-        if (drawCircle)
-        {
-            window.draw(circle);
-        }
+        //if (drawCircle)
+        //{
+        //   /* window.draw(text);*/
+        //    window.draw(circle);
+        //}
+
+        window.draw(*shape.GetShape());
        
         
         ImGui::SFML::Render(window);
