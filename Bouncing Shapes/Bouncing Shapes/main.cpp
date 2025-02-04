@@ -31,13 +31,15 @@ class MyShape
     std::array<float, 2> m_size;       // {width, height}
     std::array<float, 2> m_speed;      // {xSpeed, ySpeed}
     std::array<float, 2> m_pos;        // {xPos, yPos}
-    std::array<int, 3> m_color;        // {r, g, b}
+    std::array<float, 3> m_color;        // {r, g, b}
+    bool m_canDrawShape = true;
+    float m_scale = 1;
 
     sf::Text m_text;
 
 public:
 
-    MyShape(std::string name, std::string shapeType, std::array<float, 2> size, std::array<float, 2> startSpeed, std::array<float, 2> startPos, std::array<int, 3> color)
+    MyShape(std::string name, std::string shapeType, std::array<float, 2> size, std::array<float, 2> startSpeed, std::array<float, 2> startPos, std::array<float, 3> color)
         : m_name(name), m_shapeType(shapeType), m_size(size), m_speed(startSpeed), m_pos(startPos), m_color(color), m_text(font, m_name, fontSize)
     {
         if (m_shapeType == "Circle")
@@ -56,7 +58,7 @@ public:
             std::cout << "Shape was not created" << std::endl;
         }
 
-        ChangeColor(m_color);
+        SetColor(m_color);
         // Initialize m_text after the font is loaded
         m_text.setFont(font);
         m_text.setString(m_name);
@@ -81,6 +83,14 @@ public:
         
      }
 
+     float GetScale()
+     {
+         return m_scale;
+     }
+     bool GetCanDrawShape()
+     {
+         return m_canDrawShape;
+     }
      std::array <float,2> GetSpeed()
      {
          return m_speed;
@@ -88,7 +98,7 @@ public:
 
      std::array <float, 2> GetSize()
      {
-         return m_size;
+         return { m_size[0] * m_scale,m_size[1] * m_scale };
      }
 
      std::array <float, 2> GetPosition()
@@ -96,7 +106,7 @@ public:
          return m_pos;
      }
 
-     std::array <int, 3> GetColor()
+     std::array <float, 3> GetColor()
      {
          return m_color;
      }
@@ -111,33 +121,42 @@ public:
          return &m_text;
      }
 
-     void ChangeName(std::string newName)
+     void SetScale(float newScale)
+     {
+         m_scale = newScale;
+         m_shape->setScale({ m_scale, m_scale });
+     }
+     void SetCanDrawShape(bool value)
+     {
+         m_canDrawShape = value;
+     }
+     void SetName(std::string newName)
      {
          m_name = newName;
          m_text.setString(m_name);
      }
 
-     void ChangeSize(std::array<float, 2> newSize)
+     void SetSize(std::array<float, 2> newSize)
      {
          m_size = newSize;
         
      }
 
-     void ChangeSpeed(std::array<float, 2> newSpeed)
+     void SetSpeed(std::array<float, 2> newSpeed)
      {
          m_speed = newSpeed;
      }
 
-     void ChangePosotion(std::array<float, 2> newPos)
+     void SetPosition(std::array<float, 2> newPos)
      {
          m_pos = newPos;
          m_shape->setPosition({ m_pos[0],m_pos[1] });
      }
 
-     void ChangeColor(std::array<int, 3> newColor)
+     void SetColor(std::array<float, 3> newColor)
      {
          m_color = newColor;
-         m_shape->setFillColor(sf::Color(std::uint8_t(m_color[0]), std::uint8_t(m_color[1] ), std::uint8_t(newColor[2] )));
+         m_shape->setFillColor(sf::Color(std::uint8_t(m_color[0] * 255), std::uint8_t(m_color[1] * 255 ), std::uint8_t(newColor[2] * 255)));
      }
 
      void MoveShape()
@@ -149,37 +168,50 @@ public:
          m_text.setPosition({ m_shape->getGlobalBounds().getCenter().x - m_text.getGlobalBounds().size.x / 2,m_shape->getGlobalBounds().getCenter().y - m_text.getGlobalBounds().size.y });
      }  
 
-     void CheckForBounce(sf::RenderWindow *window, float* xSpeed, float* ySpeed)
+     void CheckForBounce(sf::RenderWindow *window)
      {
-         if (m_shape->getGlobalBounds().getCenter().y - m_shape->getGlobalBounds().size.y / 2 <= 0)
+         if (m_shape->getGlobalBounds().getCenter().y - m_shape->getGlobalBounds().size.y / 2 <= 0) // up
         {
-            m_speed[1] *= -1;
+             
+             if (m_speed[1] < 0)
+             {
+                 m_speed[1] *= -1;
+             }
+           
         }
-        if (m_shape->getGlobalBounds().getCenter().y + m_shape->getGlobalBounds().size.y / 2 >= window->getSize().y)
+        if (m_shape->getGlobalBounds().getCenter().y + m_shape->getGlobalBounds().size.y / 2 >= window->getSize().y)// down
         {
-            m_speed[1] *= -1;
+            if (m_speed[1] > 0)
+            {
+                m_speed[1] *= -1;
+            }
+           
         }
 
-        if (m_shape->getGlobalBounds().getCenter().x - m_shape->getGlobalBounds().size.x / 2 <= 0)
+        if (m_shape->getGlobalBounds().getCenter().x - m_shape->getGlobalBounds().size.x / 2 <= 0)//left
         {
-            m_speed[0] *= -1;
+            if (m_speed[0] < 0)
+            {
+                m_speed[0] *= -1;
+            }
+
+            
         }
-        if (m_shape->getGlobalBounds().getCenter().x+ m_shape->getGlobalBounds().size.x / 2 >= window->getSize().x)
+        if (m_shape->getGlobalBounds().getCenter().x+ m_shape->getGlobalBounds().size.x / 2 >= window->getSize().x)//right
         {
-            m_speed[0] *= -1;
+            if (m_speed[0] > 0)
+            {
+                m_speed[0] *= -1;
+            }
         }
      }
-
-     //~MyShape()
-     //{
-     //    if (m_shape != nullptr)
-     //    {
-     //        delete m_shape;
-     //        m_shape = nullptr; // Prevent double delete
-     //    }
-     //}
-
 };
+
+std::string currentShapeName;
+std::array<float,3> currentColor;
+std::array<float,2> currentVelocity;
+float currentScale;
+bool  currentCanDraw = true;
 
 void ReadFromFile(const std::string& filename, std::vector<MyShape> *shapes)
 {
@@ -190,7 +222,7 @@ void ReadFromFile(const std::string& filename, std::vector<MyShape> *shapes)
     std::array<float, 2> pos;
     std::array<float, 2> speed;
     std::array<float, 2> size;
-    std::array<int, 3> color;
+    std::array<float, 3> color;
     float radius;
 
 
@@ -222,7 +254,9 @@ void ReadFromFile(const std::string& filename, std::vector<MyShape> *shapes)
             }
             else
             {
-
+                color[0] /= 255.0f;
+                color[1] /= 255.0f;
+                color[2] /= 255.0f;
                 shapes->push_back(MyShape(shapeName, temp, { radius, radius }, speed, pos, color));
             }
         }
@@ -237,25 +271,35 @@ void ReadFromFile(const std::string& filename, std::vector<MyShape> *shapes)
             }
             else
             {
-
+                color[0] /= 255.0f;
+                color[1] /= 255.0f;
+                color[2] /= 255.0f;
+               
                 shapes->push_back(MyShape(shapeName, temp, { size[0], size[1] }, speed, pos, color));
             }
         }
 
     }
 }
+
+void UpdateImGuiVariables(MyShape* newShape)
+{
+    currentShapeName = newShape->GetName();
+    currentScale = newShape->GetScale();
+    currentColor = newShape->GetColor();
+    currentShapeName = newShape->GetName();
+    currentVelocity = newShape->GetSpeed();
+
+}
+
 int main()
 {
     std::vector < MyShape> shapes;
-
     ReadFromFile(configPath, &shapes);
+    MyShape* currentShape = &shapes[0];
 
-    /*std::cerr << "Name: " << shapes[4].GetName() << "\n"
-        << "Position: (" << shapes[4].GetPosition()[0] << ", " << shapes[4].GetPosition()[1] << ")\n"
-        << "Speed: (" << shapes[4].GetSpeed()[0] << ", " << shapes[4].GetSpeed()[1] << ")\n"
-        << "Color: (" << shapes[4].GetColor()[0] << ", " << shapes[4].GetColor()[1] << ", " << shapes[4].GetColor()[2] << ")\n"
-        << "Size: " << shapes[4].GetSize()[0] << shapes[4].GetSize()[1]<< "\n"
-        << "Shape Pointer: " << shapes[4].GetShape() << std::endl;*/
+    UpdateImGuiVariables(currentShape);
+   
 
     sf::RenderWindow window(sf::VideoMode({ wWidth, wHeight }), "Bounding Shapes!");
     window.setFramerateLimit(60);
@@ -267,19 +311,14 @@ int main()
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGui::GetIO().FontGlobalScale = 2.0f;
 
-    float c[3] = { 0.0f,1.0f,1.0f };
-    float radius = 50;
-    int segments = 32;
-    float xSpeed = 1.0f;
-    float ySpeed = 0.5f;
-    bool drawCircle = true;
-    bool drawText = true;
-    
+
+
+    static ImGuiComboFlags flags = 0;
+    static int item_selected_idx = 0; 
 
     while (window.isOpen())
     {
        
-
         while (const auto event = window.pollEvent())
         {
             ImGui::SFML::ProcessEvent(window, *event);
@@ -289,41 +328,77 @@ int main()
                 window.close();
             }
         }
-
-        ImGui::SFML::Update(window, deltaclock.restart());
-        
-        ImGui::Begin("Window Title");
-        ImGui::Text("Window Text");
-        ImGui::Checkbox("Draw Circle", &drawCircle);
-        ImGui::SameLine();
-        ImGui::Checkbox("Draw Text", &drawText);
-        ImGui::SliderFloat("Radius", &radius, 0.0f, 100.0f);
-        ImGui::SliderInt("Sides", &segments, 3, 64);
-        ImGui::SliderFloat("Xspeed", &xSpeed, -10.0f, 10.0f);
-
-        ImGui::SliderFloat("Yspeed", &ySpeed, -10.0f, 10.0f);
-        ImGui::ColorEdit3("Color", c);
-        //ImGui::InputText("Text", displayString, 255);
-        ImGui::End();
+       
+        currentShape->SetCanDrawShape(currentCanDraw);
+        currentShape->SetScale(currentScale);
+        currentShape->SetSpeed(currentVelocity);
+        currentShape->SetColor(currentColor);
 
         for (MyShape& shape : shapes)
         {
-            shape.MoveShape();
-            shape.CheckForBounce(&window, &xSpeed, &ySpeed);
+            if (shape.GetCanDrawShape())
+            {
+                shape.MoveShape();
+                shape.CheckForBounce(&window);
+            }
+
+            
         }
+
+        UpdateImGuiVariables(currentShape);
+        ImGui::SFML::Update(window, deltaclock.restart());
         
+        ImGui::Begin("Shape Properties");
+
+        //Shape Checkbox
+        std::string selected_name = shapes[item_selected_idx].GetName();
+        const char* combo_preview_value = selected_name.c_str();
+
+        if (ImGui::BeginCombo("Shapes", combo_preview_value, flags))
+        {
+            for (int n = 0; n < shapes.size(); n++)
+            {
+                const bool is_selected = (item_selected_idx == n);
+                if (ImGui::Selectable(shapes[n].GetName().c_str(), is_selected))
+                {
+                    item_selected_idx = n;
+                    currentShape = &shapes[n];
+                    UpdateImGuiVariables(currentShape);
+                }
+
+
+                
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+
+        ImGui::Checkbox("Can Draw", &currentCanDraw);
+        ImGui::SliderFloat("Scale", &currentScale, 0.5f, 5.0f);
+        ImGui::SliderFloat2("Velocity", currentVelocity.data(), -10.0f, 10.0f);
+        ImGui::ColorEdit3("Color",  currentColor.data());
+        ImGui::End();
 
         window.clear();
         
         for (MyShape& shape : shapes)
         {
-            window.draw(*shape.GetShape());
-            window.draw(*shape.GetText());
+            if (shape.GetCanDrawShape())
+            {
+                window.draw(*shape.GetShape());
+                window.draw(*shape.GetText());
+            }
+           
         }
-
     
         ImGui::SFML::Render(window);
         window.display();
+
+
     }
-	return 0;
+
+    
+    return 0;
 }
