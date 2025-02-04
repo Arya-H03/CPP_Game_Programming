@@ -4,306 +4,219 @@
 #include "imgui-sfml.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 const std::string configPath = "./resources/config.txt";
-
 
 unsigned int wWidth = 100;
 unsigned int wHeight = 100;
 
-
-std::string fontPath = "";
+std::string fontPath;
 sf::Font font;
 int fontSize = 14;
-int fontColor[3] = { 0,0,0 };
+sf::Color fontColor(0, 0, 0);
 
 
+void ErrorLog(const std::string& message) {
+    std::cerr << "Error: " << message << std::endl;
+}
 
-
-
+template <typename T>
+void DebugLog(const T& message) {
+    std::ostringstream oss;
+    oss << message;  // Convert message to string
+    std::cerr << "Debug: " << oss.str() << std::endl;
+}
 
 class MyShape
 {
     
     std::shared_ptr <sf::Shape> m_shape;
-    std::string m_name;
-    std::string m_shapeType;
-    std::array<float, 2> m_size;       // {width, height}
-    std::array<float, 2> m_speed;      // {xSpeed, ySpeed}
-    std::array<float, 2> m_pos;        // {xPos, yPos}
-    std::array<float, 3> m_color;        // {r, g, b}
+    std::string m_name, m_shapeType;
+    sf::Vector2f m_size, m_velocity, m_position;
+    sf::Color m_color;
     bool m_canDrawShape = true;
-    float m_scale = 1;
-
+    float m_scale = 1.0f;
     sf::Text m_text;
 
 public:
 
-    MyShape(std::string name, std::string shapeType, std::array<float, 2> size, std::array<float, 2> startSpeed, std::array<float, 2> startPos, std::array<float, 3> color)
-        : m_name(name), m_shapeType(shapeType), m_size(size), m_speed(startSpeed), m_pos(startPos), m_color(color), m_text(font, m_name, fontSize)
+    MyShape(std::string name, std::string shapeType, sf::Vector2f size, sf::Vector2f startSpeed, sf::Vector2f startPos, sf::Color color)
+        : m_name(name), m_shapeType(shapeType), m_size(size), m_velocity(startSpeed), m_position(startPos), m_color(color), m_text(font, m_name, fontSize)
     {
         if (m_shapeType == "Circle")
         {
-            m_shape = std::make_shared<sf::CircleShape>(m_size[0], 32); // Use shared_ptr
-            std::cout << "Circle was created with name " << m_name << std::endl;
+            m_shape = std::make_shared<sf::CircleShape>(m_size.x, 32); 
+            
         }
         else if (m_shapeType == "Rectangle")
         {
-            m_shape = std::make_shared<sf::RectangleShape>(sf::Vector2f(m_size[0], m_size[1])); // Use shared_ptr
-            std::cout << "Rect was created with name " << m_name << std::endl;
+            m_shape = std::make_shared<sf::RectangleShape>(sf::Vector2f(m_size.x, m_size.x)); 
+           
         }
         else
         {
             m_shape = nullptr;
-            std::cout << "Shape was not created" << std::endl;
+          
+           
         }
 
         SetColor(m_color);
-        // Initialize m_text after the font is loaded
         m_text.setFont(font);
         m_text.setString(m_name);
         m_text.setCharacterSize(fontSize);
-        m_text.setFillColor(sf::Color(fontColor[0], fontColor[1], fontColor[2]));
+        m_text.setFillColor(fontColor);
+     
     }
 
-    // Other methods...
+     const sf::Shape*GetShape() const { return m_shape.get(); }
+     float GetScale() const { return m_scale; }
+     bool CanDraw() const { return m_canDrawShape; }
+     sf::Vector2f GetVelocity() const { return m_velocity; }
+     sf::Vector2f GetSize() const { return m_size * m_scale; }
+     sf::Vector2f GetPosition() const { return m_position; }
+     sf::Color GetColor() const { return m_color; }
+     const std::string& GetName() const { return m_name; }
+     const sf::Text& GetText() const { return m_text; }
 
-
-     std::shared_ptr <sf::Shape> GetShape() const
-     {
-         if (m_shape != nullptr)
-         {
-             return m_shape;
-         }
-         else
-         {
-             std::cout << "Invalid shape was created with name " << m_name;
-             return nullptr;
-         }
-        
-     }
-
-     float GetScale()
-     {
-         return m_scale;
-     }
-     bool GetCanDrawShape()
-     {
-         return m_canDrawShape;
-     }
-     std::array <float,2> GetSpeed()
-     {
-         return m_speed;
-     }
-
-     std::array <float, 2> GetSize()
-     {
-         return { m_size[0] * m_scale,m_size[1] * m_scale };
-     }
-
-     std::array <float, 2> GetPosition()
-     {
-         return m_pos;
-     }
-
-     std::array <float, 3> GetColor()
-     {
-         return m_color;
-     }
-
-     std::string GetName()
-     {
-         return m_name;
-     }
-
-     sf::Text* GetText()
-     {
-         return &m_text;
-     }
-
-     void SetScale(float newScale)
-     {
-         m_scale = newScale;
-         m_shape->setScale({ m_scale, m_scale });
-     }
-     void SetCanDrawShape(bool value)
-     {
-         m_canDrawShape = value;
-     }
-     void SetName(std::string newName)
-     {
-         m_name = newName;
-         m_text.setString(m_name);
-     }
-
-     void SetSize(std::array<float, 2> newSize)
-     {
-         m_size = newSize;
-        
-     }
-
-     void SetSpeed(std::array<float, 2> newSpeed)
-     {
-         m_speed = newSpeed;
-     }
-
-     void SetPosition(std::array<float, 2> newPos)
-     {
-         m_pos = newPos;
-         m_shape->setPosition({ m_pos[0],m_pos[1] });
-     }
-
-     void SetColor(std::array<float, 3> newColor)
-     {
-         m_color = newColor;
-         m_shape->setFillColor(sf::Color(std::uint8_t(m_color[0] * 255), std::uint8_t(m_color[1] * 255 ), std::uint8_t(newColor[2] * 255)));
-     }
+     void SetScale(float scale) { m_scale = scale; m_shape->setScale({ scale, scale }); }
+     void SetCanDraw(bool value) { m_canDrawShape = value; }
+     void SetName(std::string newName){ m_name = newName;   m_text.setString(m_name);}
+     void SetSpeed(sf::Vector2f velocity) { m_velocity = velocity; }
+     void SetPosition(sf::Vector2f pos) { m_position = pos; m_shape->setPosition(pos); }
+     void SetColor(sf::Color color) { m_color = color; m_shape->setFillColor(color); }
 
      void MoveShape()
      {
-         m_pos[0] += m_speed[0];
-         m_pos[1] += m_speed[1];
-         m_shape->setPosition({ m_pos[0], m_pos[1] });
+         m_position+= m_velocity;
+         m_shape->setPosition(m_position);
+         m_text.setPosition({ m_shape->getGlobalBounds().getCenter().x - m_text.getGlobalBounds().size.x / 2,
+                              m_shape->getGlobalBounds().getCenter().y - m_text.getGlobalBounds().size.y });
+     }
 
-         m_text.setPosition({ m_shape->getGlobalBounds().getCenter().x - m_text.getGlobalBounds().size.x / 2,m_shape->getGlobalBounds().getCenter().y - m_text.getGlobalBounds().size.y });
-     }  
-
-     void CheckForBounce(sf::RenderWindow *window)
+     void CheckForBounce(sf::RenderWindow &window)
      {
-         if (m_shape->getGlobalBounds().getCenter().y - m_shape->getGlobalBounds().size.y / 2 <= 0) // up
-        {
-             
-             if (m_speed[1] < 0)
-             {
-                 m_speed[1] *= -1;
-             }
-           
-        }
-        if (m_shape->getGlobalBounds().getCenter().y + m_shape->getGlobalBounds().size.y / 2 >= window->getSize().y)// down
-        {
-            if (m_speed[1] > 0)
-            {
-                m_speed[1] *= -1;
-            }
-           
-        }
+         const auto bounds = m_shape->getGlobalBounds();
+         const auto center = bounds.getCenter();
+         const auto size = bounds.size;
 
-        if (m_shape->getGlobalBounds().getCenter().x - m_shape->getGlobalBounds().size.x / 2 <= 0)//left
-        {
-            if (m_speed[0] < 0)
-            {
-                m_speed[0] *= -1;
-            }
-
-            
-        }
-        if (m_shape->getGlobalBounds().getCenter().x+ m_shape->getGlobalBounds().size.x / 2 >= window->getSize().x)//right
-        {
-            if (m_speed[0] > 0)
-            {
-                m_speed[0] *= -1;
-            }
-        }
+         if (center.y - size.y / 2 <= 0 && m_velocity.y < 0) m_velocity.y *= -1; // up 
+      
+         if (center.y + size.y / 2 >= window.getSize().y && m_velocity.y > 0) m_velocity.y *= -1; //down
+       
+         if (center.x - size.x / 2 <= 0 && m_velocity.x < 0) m_velocity.x*= -1;//left
+        
+         if (center.x + size.x / 2 >= window.getSize().x && m_velocity.x > 0) m_velocity.x *= -1;//right
+      
      }
 };
 
-std::string currentShapeName;
-std::array<float,3> currentColor;
-std::array<float,2> currentVelocity;
-float currentScale;
-bool  currentCanDraw = true;
-
-void ReadFromFile(const std::string& filename, std::vector<MyShape> *shapes)
+void ReadFromFile(const std::string& filename, std::vector<MyShape> &shapes)
 {
     std::string temp;
     std::ifstream fin(filename);
 
+    if (!fin)
+    {
+        ErrorLog("Could not open file: " + filename);
+    }
+
     std::string shapeName;
-    std::array<float, 2> pos;
-    std::array<float, 2> speed;
-    std::array<float, 2> size;
-    std::array<float, 3> color;
+    sf::Vector2f pos, speed, size;
+    sf::Color color;
     float radius;
 
 
     while (fin >> temp)
     {
         if (temp == "Window") {
-            if (!(fin >> wWidth >> wHeight)) {
-                std::cerr << "Error: Invalid format for window size." << std::endl;
-                return;
-                
+            if (!(fin >> wWidth >> wHeight))
+            {
+                ErrorLog("Invalid format for window size.");             
+                return;                
             }
         }
         else if (temp == "Font")
         {
-            if (!(fin >> fontPath >> fontSize >> fontColor[0] >> fontColor[1] >> fontColor[2]))
+            int r, g, b;
+            if (!(fin >> fontPath >> fontSize >> r >> g >> b))
             {
-                std::cerr << "Error: Invalid format for font.";
+                ErrorLog("Invalid format for font.");
                 return;
             }
+            else fontColor = sf::Color(r, g, b);
+           
+           
+            
         }
         else if (temp == "Circle")
         {
-            if (!(fin >> shapeName >> pos[0] >> pos[1] >> speed[0] >> speed[1] >> color[0] >> color[1] >> color[2] >> radius))
+            int r, g, b;
+            if (!(fin >> shapeName >> pos.x >> pos.y >> speed.x >> speed.y >> r >> g >> b >> radius))
             {
-                std::cerr << "Error: Invalid format for Circle.";
+                ErrorLog("Invalid format for Circle.");
                 return;
-
-
             }
             else
             {
-                color[0] /= 255.0f;
-                color[1] /= 255.0f;
-                color[2] /= 255.0f;
-                shapes->push_back(MyShape(shapeName, temp, { radius, radius }, speed, pos, color));
+                color = sf::Color(r, g, b);
+                shapes.push_back(MyShape(shapeName, temp, { radius, radius }, speed, pos, color));
             }
         }
         else if(temp == "Rectangle")
         {
-            if (!(fin >> shapeName >> pos[0] >> pos[1] >> speed[0] >> speed[1] >> color[0] >> color[1] >> color[2] >> size[0]>>size[1]))
+            int r, g, b;
+            if (!(fin >> shapeName >> pos.x >> pos.y >> speed.x >> speed.y >> r >> g >> b >> size.x >> size.y))
             {
-                std::cerr << "Error: Invalid format for Rectangle.";
+                ErrorLog("Invalid format for Rectangle.");
                 return;
-
-
             }
             else
             {
-                color[0] /= 255.0f;
-                color[1] /= 255.0f;
-                color[2] /= 255.0f;
-               
-                shapes->push_back(MyShape(shapeName, temp, { size[0], size[1] }, speed, pos, color));
+                color = sf::Color(r, g, b);               
+                shapes.push_back(MyShape(shapeName, temp, size, speed, pos, color));
             }
         }
-
     }
 }
 
-void UpdateImGuiVariables(MyShape* newShape)
+void UpdateImGui(MyShape& shape, bool &currentCanDraw, std::string& currentShapeName, sf::Vector2f& currentVelocity, float& currentScale, sf::Color& currentColor)
 {
-    currentShapeName = newShape->GetName();
-    currentScale = newShape->GetScale();
-    currentColor = newShape->GetColor();
-    currentShapeName = newShape->GetName();
-    currentVelocity = newShape->GetSpeed();
-
+    currentShapeName = shape.GetName();
+    currentVelocity = shape.GetVelocity();
+    currentScale = shape.GetScale();
+    currentColor = shape.GetColor();
+    currentCanDraw = shape.CanDraw();
 }
+
+void UpdateCurrentShape(MyShape& currentShape, bool &currentCanDraw, std::string& currentShapeName, sf::Vector2f& currentVelocity, float& currentScale, sf::Color& currentColor)
+{
+    currentShape.SetCanDraw(currentCanDraw);
+    currentShape.SetScale(currentScale);
+    currentShape.SetSpeed(currentVelocity);
+    currentShape.SetColor(currentColor);
+}
+
 
 int main()
 {
     std::vector < MyShape> shapes;
-    ReadFromFile(configPath, &shapes);
-    MyShape* currentShape = &shapes[0];
 
-    UpdateImGuiVariables(currentShape);
+    ReadFromFile(configPath, shapes);
+    if (shapes.empty()) 
+    {
+        ErrorLog("No shapes loaded.");
+        return -1;
+    }
+
+    if (!font.openFromFile(fontPath)) {
+        ErrorLog("Failed to load font.");
+        return -1;
+    }
+
    
-
     sf::RenderWindow window(sf::VideoMode({ wWidth, wHeight }), "Bounding Shapes!");
     window.setFramerateLimit(60);
-    font.openFromFile(fontPath);
 
     ImGui::SFML::Init(window);
     sf::Clock deltaclock;
@@ -311,10 +224,17 @@ int main()
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGui::GetIO().FontGlobalScale = 2.0f;
 
+    std::string currentShapeName;
+    sf::Vector2f currentVelocity;
+    float currentScale;
+    sf::Color currentColor;
+    bool currentCanDraw;
+    MyShape* currentShape = &shapes[0];
 
+    UpdateImGui(*currentShape, currentCanDraw, currentShapeName, currentVelocity, currentScale, currentColor);
 
-    static ImGuiComboFlags flags = 0;
-    static int item_selected_idx = 0; 
+    ImGuiComboFlags flags = 0;
+    int item_selected_idx = 0; 
 
     while (window.isOpen())
     {
@@ -329,23 +249,20 @@ int main()
             }
         }
        
-        currentShape->SetCanDrawShape(currentCanDraw);
-        currentShape->SetScale(currentScale);
-        currentShape->SetSpeed(currentVelocity);
-        currentShape->SetColor(currentColor);
+        UpdateCurrentShape(*currentShape, currentCanDraw, currentShapeName, currentVelocity, currentScale, currentColor);
 
-        for (MyShape& shape : shapes)
+        //Movement & Bounce
+        for (auto &shape : shapes)
         {
-            if (shape.GetCanDrawShape())
+            if (shape.CanDraw())
             {
                 shape.MoveShape();
-                shape.CheckForBounce(&window);
-            }
-
-            
+                shape.CheckForBounce(window);
+            }          
         }
+        //
 
-        UpdateImGuiVariables(currentShape);
+        UpdateImGui(*currentShape, currentCanDraw, currentShapeName, currentVelocity, currentScale, currentColor);
         ImGui::SFML::Update(window, deltaclock.restart());
         
         ImGui::Begin("Shape Properties");
@@ -363,7 +280,7 @@ int main()
                 {
                     item_selected_idx = n;
                     currentShape = &shapes[n];
-                    UpdateImGuiVariables(currentShape);
+                    UpdateImGui(*currentShape, currentCanDraw, currentShapeName, currentVelocity, currentScale, currentColor);
                 }
 
 
@@ -373,25 +290,48 @@ int main()
             }
             ImGui::EndCombo();
         }
+        //
 
-
+        //CanDraw CheckBox
         ImGui::Checkbox("Can Draw", &currentCanDraw);
+
+        //Scale Slider
         ImGui::SliderFloat("Scale", &currentScale, 0.5f, 5.0f);
-        ImGui::SliderFloat2("Velocity", currentVelocity.data(), -10.0f, 10.0f);
-        ImGui::ColorEdit3("Color",  currentColor.data());
+
+        //Velocity Slider
+        float velocity[2] = { currentVelocity.x, currentVelocity.y };
+        if (ImGui::SliderFloat2("Velocity", velocity, -10.0f, 10.0f))
+        {
+            currentVelocity.x = velocity[0];
+            currentVelocity.y = velocity[1];
+        }
+        //
+        
+        //Color Props
+        float color[3] = { currentColor.r / 255.0f, currentColor.g / 255.0f, currentColor.b / 255.0f };
+        if (ImGui::ColorEdit3("Color", color))
+        {
+            currentColor.r = std::uint8_t(color[0] * 255);
+            currentColor.g = std::uint8_t(color[1] * 255);
+            currentColor.b = std::uint8_t(color[2] * 255);
+        }
         ImGui::End();
+        //
 
         window.clear();
         
-        for (MyShape& shape : shapes)
+
+        //Drawing
+        for (auto& shape : shapes)
         {
-            if (shape.GetCanDrawShape())
+            if (shape.CanDraw())
             {
                 window.draw(*shape.GetShape());
-                window.draw(*shape.GetText());
+                window.draw(shape.GetText());
             }
            
         }
+        //
     
         ImGui::SFML::Render(window);
         window.display();
