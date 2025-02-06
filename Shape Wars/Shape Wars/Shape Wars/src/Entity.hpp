@@ -13,8 +13,8 @@ using ComponentTuple = std::tuple<
 	CCollision,
 	CScore,
 	CLifeSpan,
-	CInput,
-	
+	CInput
+
 >;
 
 class Entity
@@ -31,57 +31,57 @@ class Entity
 
 public:
 
-	bool isActive() const
+	bool IsActive() const
 	{
 		return m_active;
 	}
 
-	void destroy()
+	void Destroy()
 	{
 		m_active = false;
 	}
 
-	size_t id() const
+	size_t Id() const
 	{
 		return m_id;
 	}
 
-	const std::string& tag() const
+	const std::string& Tag() const
 	{
 		return m_tag;
 	}
 
 	template <typename T>
-	T& get()
+	T& Get()
 	{
 		return std::get<T>(m_components);
 	}
 
 	template <typename T>
-	const T& get() const
+	const T& Get() const
 	{
 		return std::get<T>(m_components);
 	}
 
 	template <typename T>
-	void remove()
+	void Remove()
 	{
-		get<T>() = T();
+		Get<T>() = T();
 	}
 
 	template<typename T,typename... TArgs>
-	T& add(TArgs&&... mArgs)
+	T& Add(TArgs&&... mArgs)
 	{
-		auto& component = get<T>();
+		auto& component = Get<T>();
 		component = T(std::forward<TArgs>(mArgs)...);
 		component.exists = true;
 		return component;
 	}
 
 	template <typename T>
-	bool has() const
+	bool Has() const
 	{
-		return get<T>().exists;
+		return Get<T>().exists;
 	}
 
 };
