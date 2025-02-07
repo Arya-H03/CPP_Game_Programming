@@ -36,6 +36,7 @@ void Game::Run()
 		ImGui::SFML::Update(m_window, m_clock.restart());
 
 		SEnemySpawner();
+
 		SMovement();
 		SCollision();
 		SUserInput();

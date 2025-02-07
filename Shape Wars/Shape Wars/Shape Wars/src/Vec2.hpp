@@ -18,27 +18,33 @@ public:
 
 	operator sf::Vector2<T>() { return sf::Vector2<T>(x, y); }
 
-	Vec2 operator + (const Vec2& rhs) const {}
+	Vec2 operator + (const Vec2& rhs) const { return Vec2(x + rhs.x, y + rhs.y); }
 
-	Vec2 operator - (const Vec2& rhs) const {}
+	Vec2 operator - (const Vec2& rhs) const { return Vec2(x - rhs.x, y - rhs.y); }
 
-	Vec2 operator / (const Vec2& rhs) const {}
+	Vec2 operator / (const Vec2& rhs) const { return Vec2(x / rhs.x, y / rhs.y); }
 
-	Vec2 operator * (const Vec2& rhs) const {}
+	Vec2 operator * (const Vec2& rhs) const { return Vec2(x * rhs.x, y * rhs.y); }
 
-	bool operator == (const Vec2& rhs) const {}
+	Vec2 operator / (const T value) const { return Vec2(x / value, y / value); }
 
-	bool operator != (const Vec2& rhs) const {}
+	Vec2 operator * (const T value) const { return Vec2(x * value, y * value); }
 
-	void operator += (const Vec2& rhs){}
+	bool operator == (const Vec2& rhs) const { return(x == rhs.x && y == rhs.y) }
 
-	void operator -= (const Vec2& rhs) {}
+	bool operator != (const Vec2& rhs) const { return(x != rhs.x || y != rhs.y) }
 
-	void operator *= (const T val) {}
+	void operator += (const Vec2& rhs) { x += rhs.x; y += rhs.y; }
 
-	void operator /= (const T rhs) {}
+	void operator -= (const Vec2& rhs) { x _= rhs.x; y _= rhs.y; }
 
-	float dist(const Vec2& rhs) const{}
+	void operator *= (const T val) { x *=  val; y *= val; }
+
+	void operator /= (const T val) { x /= val; y = y /= val; }
+
+	float Dist(const Vec2& rhs) const { return std::sqrt((x - rhs.x) * (x - rhs.x) + (y - rhs.y) * (y - rhs.y)); }
+
+	void Print() { std::cerr << "Vec: (" << x << ", " << y<<")"<<"\n"; }
 
 };
 

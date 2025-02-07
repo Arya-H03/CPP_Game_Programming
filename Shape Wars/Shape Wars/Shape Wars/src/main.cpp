@@ -4,8 +4,8 @@
 
 int main()
 {
-    Game game("config.text");
-    game.Run();
+   /* Game game("config.text");
+    game.Run();*/
 
     
 }
