@@ -15,7 +15,8 @@ class EntityManager
 
 	void RemoveDeadEntities(EntityVec& vec)
 	{
-
+		vec.erase(std::remove_if(vec.begin(),vec.end(),
+			[](const auto& e) { return !e->IsActive(); }), vec.end());
 	}
 
 public:
@@ -24,7 +25,18 @@ public:
 	
 	void Update()
 	{
+		for (auto& e : m_entitiesToAdd)
+		{
+			m_entities.push_back(e);
+		}
+		m_entitiesToAdd.clear();
 
+
+		RemoveDeadEntities(m_entities);
+		for (auto& [tag, entityVec] : m_entityMap)
+		{
+			RemoveDeadEntities(m_entityMap[tag]);
+		}
 	}
 
 	std::shared_ptr<Entity> AddEntity(const std::string& tag)

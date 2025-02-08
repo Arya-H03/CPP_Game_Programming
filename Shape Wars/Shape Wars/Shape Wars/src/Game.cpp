@@ -15,14 +15,17 @@ void Game::init(const std::string& path)
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
-	//SpawnPlayer();
+	SpawnPlayer();
+	SpawnPlayer();
+	SpawnPlayer();
+	SpawnPlayer();
 
 }
 
 std::shared_ptr<Entity> Game::Player()
 {
-	/*auto& players = m_entities.GetEntities("player");
-	return players.front();*/
+	auto& players = m_entities.GetEntities("Player");
+	return players.front();
 
 	return nullptr;
 }
@@ -93,27 +96,27 @@ void Game::SLifeSpan()
 
 void Game::SUserInput()
 {
-	//while (const auto event = m_window.pollEvent())
-	//{
-	//	ImGui::SFML::ProcessEvent(m_window, *event);
+	while (const auto event = m_window.pollEvent())
+	{
+		ImGui::SFML::ProcessEvent(m_window, *event);
 
-	//	if (event->is<sf::Event::Closed>())
-	//	{
-	//		m_running = false;
-	//		//m_window.close();
-	//	}
+		if (event->is<sf::Event::Closed>())
+		{
+			m_running = false;
+			m_window.close();
+		}
 
-	//	/*if (event->is<sf::Event::KeyPressed>())
-	//	{
-	//		switch (event.key.code)
-	//		{
-	//		case sf::Keyboard::W:
+		/*if (event->is<sf::Event::KeyPressed>())
+		{
+			switch (event.key.code)
+			{
+			case sf::Keyboard::W:
 
-	//		default:
-	//			break;
-	//		}
-	//	}*/
-	//}
+			default:
+				break;
+			}
+		}*/
+	}
 
 	
 }
@@ -122,11 +125,11 @@ void Game::SRender()
 {
 	m_window.clear();
 
-	/*Player()->Get<CShape>().circle.setPosition(Player()->Get<CTransform>().pos);
+	Player()->Get<CShape>().circle.setPosition(Player()->Get<CTransform>().pos);
 	Player()->Get<CTransform>().angle += 1.0f;
 	Player()->Get<CShape>().circle.setRotation(sf::degrees(Player()->Get<CTransform>().angle));
 
-	m_window.draw(Player()->Get<CShape>().circle);*/
+	m_window.draw(Player()->Get<CShape>().circle);
 
 	ImGui::SFML::Render(m_window);
 
@@ -138,6 +141,54 @@ void Game::SRender()
 void Game::SGUI()
 {
 	ImGui::Begin("Shape Wars");
+	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+	if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+	{
+		if (ImGui::BeginTabItem("Systems"))
+		{
+			ImGui::Text("This is the Systems tab!\nblah blah blah blah blah");
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Entities"))
+		{
+			if (ImGui::CollapsingHeader("Entities by Tags"))
+			{
+				
+			}
+
+			if (ImGui::CollapsingHeader("All Entities"))
+			{
+				bool isDestroyed = false;
+				for (auto& e : m_entities.GetEntities())
+				{
+					//Delete btn
+					static int clicked = 0;
+					isDestroyed = false;
+					sf::Color shapeColor = e->Get<CShape>().circle.getFillColor();
+					ImGui::PushID(e->Id());
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(shapeColor.r / 255, shapeColor.g / 255, shapeColor.b /255, 1.0f));
+					if (ImGui::Button("D")) isDestroyed = true;
+					ImGui::PopStyleColor();
+					ImGui::PopID();
+					ImGui::SameLine();
+					//ID
+					ImGui::Text("%i", e->Id());
+					ImGui::SameLine();
+					//Tag
+					ImGui::Text("%s", e->Tag().c_str());
+					ImGui::SameLine();
+					//Position
+					ImGui::Text("(%.2f,%.2f)", e->Get<CTransform>().pos.x, e->Get<CTransform>().pos.y);
+					
+					if (isDestroyed) e->Destroy();
+				}
+				
+			}
+
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
 	ImGui::End();
 }
 

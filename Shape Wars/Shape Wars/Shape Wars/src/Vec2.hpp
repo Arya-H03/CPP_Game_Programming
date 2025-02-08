@@ -30,13 +30,13 @@ public:
 
 	Vec2 operator * (const T value) const { return Vec2(x * value, y * value); }
 
-	bool operator == (const Vec2& rhs) const { return(x == rhs.x && y == rhs.y) }
+	bool operator == (const Vec2& rhs) const { return(x == rhs.x && y == rhs.y); }
 
-	bool operator != (const Vec2& rhs) const { return(x != rhs.x || y != rhs.y) }
+	bool operator != (const Vec2& rhs) const { return(x != rhs.x || y != rhs.y); }
 
 	void operator += (const Vec2& rhs) { x += rhs.x; y += rhs.y; }
 
-	void operator -= (const Vec2& rhs) { x _= rhs.x; y _= rhs.y; }
+	void operator -= (const Vec2& rhs) { x -= rhs.x; y -= rhs.y; }
 
 	void operator *= (const T val) { x *=  val; y *= val; }
 
