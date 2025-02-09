@@ -145,6 +145,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\FileData.hpp" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Components.hpp" />
     <ClInclude Include="src\Entity.hpp" />
@@ -159,6 +160,9 @@
     <ClInclude Include="src\imgui\imstb_textedit.h" />
     <ClInclude Include="src\imgui\imstb_truetype.h" />
     <ClInclude Include="src\Vec2.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\config.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

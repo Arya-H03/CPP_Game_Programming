@@ -4,8 +4,7 @@
 
 int main()
 {
-    Game game("config.text");
+    Game game("./src/config.txt");
     game.Run();
-
     
 }

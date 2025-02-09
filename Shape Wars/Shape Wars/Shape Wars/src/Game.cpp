@@ -8,17 +8,16 @@ Game::Game(const std::string& config)
 
 void Game::init(const std::string& path)
 {
-	m_window.create(sf::VideoMode({ 1280, 720 }), "Shape Wars");
-	m_window.setFramerateLimit(60);
+	m_fileData.ReadFromFile(path);
+	m_window.create(sf::VideoMode({ m_fileData.windowW, m_fileData.windowH }), "Shape Wars");
+	m_window.setFramerateLimit(m_fileData.frameLimit);
 
 	ImGui::SFML::Init(m_window);
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
 	SpawnPlayer();
-	SpawnPlayer();
-	SpawnPlayer();
-	SpawnPlayer();
+	
 
 }
 
@@ -26,8 +25,6 @@ std::shared_ptr<Entity> Game::Player()
 {
 	auto& players = m_entities.GetEntities("Player");
 	return players.front();
-
-	return nullptr;
 }
 
 void Game::Run()
@@ -65,7 +62,9 @@ void Game::SpawnPlayer()
 
 void Game::SpawnEnemy()
 {
-	m_lastEnemySpawnTime = m_currentFrame;
+	auto entity = m_entities.AddEntity("Enemy");
+	entity->Add<CTransform>(Vec2f(200, 200), Vec2f(1.0f, 1.0f), 0.0f);
+	entity->Add<CShape>(32.0f, 8, sf::Color(255, 10, 10), sf::Color(255, 0, 0), 4.0f);
 }
 
 void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
@@ -84,9 +83,9 @@ void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mous
 
 void Game::SMovement()
 {
-	/*auto& transform = Player()->Get<CTransform>();
-	transform.pos.x = transform.velocity.x;
-	transform.pos.y = transform.velocity.y;*/
+	auto& transform = Player()->Get<CTransform>();
+	transform.pos.x += transform.velocity.x;
+	transform.pos.y += transform.velocity.y;
 }
 
 void Game::SLifeSpan()
@@ -131,6 +130,14 @@ void Game::SRender()
 
 	m_window.draw(Player()->Get<CShape>().circle);
 
+	for (auto& enemy : m_entities.GetEntities("Enemy"))
+	{
+		enemy->Get<CShape>().circle.setPosition(enemy->Get<CTransform>().pos);
+		enemy->Get<CTransform>().angle += 1.0f;
+		enemy->Get<CShape>().circle.setRotation(sf::degrees(enemy->Get<CTransform>().angle));
+		m_window.draw(enemy->Get<CShape>().circle);
+	}
+
 	ImGui::SFML::Render(m_window);
 
 	m_window.display();
@@ -151,9 +158,38 @@ void Game::SGUI()
 		}
 		if (ImGui::BeginTabItem("Entities"))
 		{
+			int btnId = 0;
 			if (ImGui::CollapsingHeader("Entities by Tags"))
 			{
-				
+				for (auto& [tag, entityVec] : m_entities.GetEntityMap())
+				{
+					std::string headerName = tag;
+					if (ImGui::CollapsingHeader(headerName.c_str()))
+					{
+						bool isDestroyed = false;
+						for (auto& e : entityVec)
+						{
+							//Delete btn
+							static int clicked = 0;
+							isDestroyed = false;
+							sf::Color shapeColor = e->Get<CShape>().circle.getFillColor();
+							ImGui::PushID(btnId);
+							btnId++;
+							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(shapeColor.r / 255, shapeColor.g / 255, shapeColor.b / 255, 1.0f));
+							if (ImGui::Button("D")) isDestroyed = true;
+							ImGui::PopStyleColor();
+							ImGui::PopID();
+							ImGui::SameLine();
+							//ID
+							ImGui::Text("%i", e->Id());
+							ImGui::SameLine();
+							//Position
+							ImGui::Text("(%.2f,%.2f)", e->Get<CTransform>().pos.x, e->Get<CTransform>().pos.y);
+
+							if (isDestroyed) e->Destroy();
+						}
+					}
+				}
 			}
 
 			if (ImGui::CollapsingHeader("All Entities"))
@@ -165,7 +201,8 @@ void Game::SGUI()
 					static int clicked = 0;
 					isDestroyed = false;
 					sf::Color shapeColor = e->Get<CShape>().circle.getFillColor();
-					ImGui::PushID(e->Id());
+					ImGui::PushID(btnId);
+					btnId++;
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(shapeColor.r / 255, shapeColor.g / 255, shapeColor.b /255, 1.0f));
 					if (ImGui::Button("D")) isDestroyed = true;
 					ImGui::PopStyleColor();
@@ -194,7 +231,12 @@ void Game::SGUI()
 
 void Game::SEnemySpawner()
 {
-
+	if (m_currentFrame - m_lastEnemySpawnTime >= 120)
+	{
+		SpawnEnemy();
+		m_lastEnemySpawnTime = m_currentFrame;
+	}
+	
 }
 
 void Game::SCollision()
