@@ -46,6 +46,15 @@ public:
 
 	void Print() { std::cerr << "Vec: (" << x << ", " << y<<")"<<"\n"; }
 
+	float Length() { return(std::sqrt(x * x + y * y)); }
+
+	Vec2 Normalize()
+	{
+		if (Length() == 0) { return Vec2(0, 0); }
+
+		return Vec2(x / Length(), y / Length());
+	}
+
 };
 
 using Vec2f = Vec2<float>;

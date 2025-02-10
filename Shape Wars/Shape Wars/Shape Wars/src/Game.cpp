@@ -55,8 +55,8 @@ void Game::SetPaused(bool value)
 void Game::SpawnPlayer()
 {
 	auto entity = m_entities.AddEntity("Player");
-	entity->Add<CTransform>(Vec2f(200.0f, 200.0f), Vec2f(1.0f, 1.0f), 0.0f);
-	entity->Add<CShape>(32.0f,8,sf::Color(10,10,10), sf::Color(255, 0, 0),4.0f);
+	entity->Add<CTransform>(Vec2f(m_fileData.windowW / 2, m_fileData.windowH / 2), Vec2f(0, 0), 0.0f);
+	entity->Add<CShape>(m_fileData.playerShapeRadius, m_fileData.playerShapeVer, m_fileData.playerFillColor, m_fileData.playerOutColor, m_fileData.playerOutThickness);
 	entity->Add<CInput>();
 }
 
@@ -83,9 +83,15 @@ void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mous
 
 void Game::SMovement()
 {
+	// Player Movement
 	auto& transform = Player()->Get<CTransform>();
-	transform.pos.x += transform.velocity.x;
-	transform.pos.y += transform.velocity.y;
+	auto& input = Player()->Get<CInput>();
+
+	transform.velocity.y = (input.down - input.up);
+	transform.velocity.x = (input.right - input.left);
+
+	if (transform.velocity.x != 0 && transform.velocity.y != 0) {transform.velocity = transform.velocity.Normalize();}
+	transform.pos += transform.velocity * m_fileData.playerSpeed;
 }
 
 void Game::SLifeSpan()
@@ -95,8 +101,11 @@ void Game::SLifeSpan()
 
 void Game::SUserInput()
 {
+	auto& inputC = Player()->Get<CInput>();
+
 	while (const auto event = m_window.pollEvent())
 	{
+		
 		ImGui::SFML::ProcessEvent(m_window, *event);
 
 		if (event->is<sf::Event::Closed>())
@@ -105,16 +114,50 @@ void Game::SUserInput()
 			m_window.close();
 		}
 
-		/*if (event->is<sf::Event::KeyPressed>())
+		else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
 		{
-			switch (event.key.code)
+			
+			switch (keyPressed->scancode)
 			{
-			case sf::Keyboard::W:
-
+			case sf::Keyboard::Scancode::W:
+				inputC.up = true;				
+				break;
+			case sf::Keyboard::Scancode::S:
+				inputC.down = true;
+				break;
+			case sf::Keyboard::Scancode::A:
+				inputC.left = true;
+				break;
+			case sf::Keyboard::Scancode::D:
+				inputC.right = true;
+				break;
 			default:
 				break;
 			}
-		}*/
+		
+		}
+
+		else if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
+		{
+			switch (keyReleased->scancode)
+			{
+			case sf::Keyboard::Scancode::W:
+				inputC.up = false;
+				break;
+			case sf::Keyboard::Scancode::S:
+				inputC.down = false;
+				break;
+			case sf::Keyboard::Scancode::A:
+				inputC.left = false;
+				break;
+			case sf::Keyboard::Scancode::D:
+				inputC.right = false;
+				break;
+			default:
+				break;
+			}
+
+		}
 	}
 
 	
@@ -231,11 +274,11 @@ void Game::SGUI()
 
 void Game::SEnemySpawner()
 {
-	if (m_currentFrame - m_lastEnemySpawnTime >= 120)
+	/*if (m_currentFrame - m_lastEnemySpawnTime >= 120)
 	{
 		SpawnEnemy();
 		m_lastEnemySpawnTime = m_currentFrame;
-	}
+	}*/
 	
 }
 
