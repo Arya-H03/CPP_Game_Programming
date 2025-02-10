@@ -36,7 +36,6 @@ void Game::Run()
 		ImGui::SFML::Update(m_window, m_clock.restart());
 
 		SEnemySpawner();
-
 		SMovement();
 		SCollision();
 		SUserInput();
@@ -63,9 +62,32 @@ void Game::SpawnPlayer()
 
 void Game::SpawnEnemy()
 {
+	//Random Pos
+	int rXpos = m_configData.enemyShapeRadius + rand() % (m_configData.windowW - m_configData.enemyShapeRadius + 1);
+	int rYpos = m_configData.enemyShapeRadius + rand() % (m_configData.windowH - m_configData.enemyShapeRadius + 1);
+	
+	//Random Vel
+	int rXVel = -1 + rand() % 3;
+	int rYVel = -1 + rand() % 3;
+	while (rXVel == 0 && rYVel == 0)
+	{
+		rXVel = -1 + rand() % 3;
+		rYVel = -1 + rand() % 3;
+	}
+	//Random Color
+	uint32_t r, g, b;
+	r = rand() % 256;
+	g = rand() % 256;
+	b = rand() % 256;
+
+	//Random Ver
+	int rVer = m_configData.enemyMinShapeVer + rand() % (m_configData .enemyMaxShapeVer +1);
+
+
 	auto entity = m_entities.AddEntity("Enemy");
-	entity->Add<CTransform>(Vec2f(200, 200), Vec2f(1.0f, 1.0f), 0.0f);
-	entity->Add<CShape>(32.0f, 8, sf::Color(255, 10, 10), sf::Color(255, 0, 0), 4.0f);
+	entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0);
+	entity->Add<CShape>(m_configData.enemyShapeRadius, rVer, sf::Color(r, g, b), m_configData.enemyOutColor, 4.0f);
+	entity->Add<CCollision>(m_configData.enemyCollisionRadius);
 }
 
 void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
@@ -118,6 +140,25 @@ void Game::SMovement()
 	{
 		auto& transform = bullet->Get<CTransform>();
 		transform.pos += transform.velocity.Normalize() * m_configData.bulletSpeed;
+	}
+
+	//Enemy Movement
+	for (auto& enemy : m_entities.GetEntities("Enemy"))
+	{
+		auto& transform = enemy->Get<CTransform>();
+		int rSpeed = m_configData.enemyMinSpeed + rand() % (m_configData.enemyMaxSpeed + 1);
+		transform.pos += transform.velocity.Normalize() * rSpeed;
+
+		//Bound Check
+		if (transform.pos.y - m_configData.enemyShapeRadius <= 0 || transform.pos.y + m_configData.enemyShapeRadius >= m_configData.windowH)
+		{
+			transform.velocity.y *= -1;
+		}
+
+		if (transform.pos.x - m_configData.enemyShapeRadius <= 0 || transform.pos.x + m_configData.enemyShapeRadius >= m_configData.windowW)
+		{
+			transform.velocity.x *= -1;
+		}
 	}
 	
 }
@@ -348,11 +389,11 @@ void Game::SGUI()
 
 void Game::SEnemySpawner()
 {
-	/*if (m_currentFrame - m_lastEnemySpawnTime >= 120)
+	if (m_currentFrame - m_lastEnemySpawnTime >= m_configData.spawnInterval)
 	{
 		SpawnEnemy();
 		m_lastEnemySpawnTime = m_currentFrame;
-	}*/
+	}
 	
 }
 

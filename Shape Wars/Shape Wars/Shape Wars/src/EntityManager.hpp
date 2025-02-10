@@ -31,8 +31,8 @@ public:
 		}
 		m_entitiesToAdd.clear();
 
-
 		RemoveDeadEntities(m_entities);
+
 		for (auto& [tag, entityVec] : m_entityMap)
 		{
 			RemoveDeadEntities(m_entityMap[tag]);
