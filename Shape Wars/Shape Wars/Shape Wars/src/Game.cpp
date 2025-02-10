@@ -1,6 +1,7 @@
 #include "Game.h"
 #include<iostream>
 
+
 Game::Game(const std::string& config)
 {
 	init(config);
@@ -55,7 +56,7 @@ void Game::SetPaused(bool value)
 void Game::SpawnPlayer()
 {
 	auto player = m_entities.AddEntity("Player");
-	player->Add<CTransform>(Vec2f(m_configData.windowW / 2, m_configData.windowH / 2), Vec2f(0, 0), 0.0f);
+	player->Add<CTransform>(Vec2f(m_configData.windowW / 2, m_configData.windowH / 2), Vec2f(0, 0), 0.0f,m_configData.playerSpeed);
 	player->Add<CShape>(m_configData.playerShapeRadius, m_configData.playerShapeVer, m_configData.playerFillColor, m_configData.playerOutColor, m_configData.playerOutThickness);
 	player->Add<CInput>();
 }
@@ -83,15 +84,36 @@ void Game::SpawnEnemy()
 	//Random Ver
 	int rVer = m_configData.enemyMinShapeVer + rand() % (m_configData .enemyMaxShapeVer +1);
 
+	//Random Speed
+	float rSpeed = m_configData.enemyMinSpeed + rand() % (m_configData.enemyMaxSpeed + 1);
 
 	auto entity = m_entities.AddEntity("Enemy");
-	entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0);
+	entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0, rSpeed);
 	entity->Add<CShape>(m_configData.enemyShapeRadius, rVer, sf::Color(r, g, b), m_configData.enemyOutColor, 4.0f);
 	entity->Add<CCollision>(m_configData.enemyCollisionRadius);
 }
 
 void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 {
+	auto& shape = entity->Get<CShape>();
+	auto& transform = entity->Get<CTransform>();
+	int ver = shape.circle.getPointCount();
+
+	float a = 360 / ver;
+	for (int i = 0; i < ver; i++)
+	{
+		float angle = ((90 - (a / 2)) - (a * i)) * (3.14159265358979323846 / 180.0);
+		Vec2f vel(std::cos(angle) * shape.circle.getRadius(), std::sin(angle) * shape.circle.getRadius());
+
+		auto sEnemy = m_entities.AddEntity("SmallEnemy");
+		sEnemy->Add<CTransform>(transform.pos, vel,0, transform.speed);
+		sEnemy->Add<CShape>(shape.circle.getRadius() / 2, shape.circle.getPointCount(), shape.circle.getFillColor(), shape.circle.getOutlineColor(), shape.circle.getOutlineThickness() / 2);
+		sEnemy->Add<CCollision>(entity->Get<CCollision>().radius / 2);
+		sEnemy->Add<CLifeSpan>(m_configData.smallEnemyLifeSpan);
+	}
+
+	
+
 	
 }
 
@@ -99,7 +121,7 @@ void Game::SpawnBullet(std::shared_ptr<Entity> player, const Vec2f& mousePos)
 {
 	auto bullet = m_entities.AddEntity("Bullet");
 	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
-	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0);
+	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0,m_configData.bulletSpeed);
 	bullet->Add<CShape>(m_configData.bulletShapeRadius,m_configData.bulletShapeVer, m_configData.bulletFillColor, m_configData.bulletOutColor, m_configData.bulletOutThickness);
 	bullet->Add<CCollision>(m_configData.bulletCollisionRadius);
 	bullet->Add<CLifeSpan>(m_configData.bulletLifeSpan);
@@ -132,22 +154,21 @@ void Game::SMovement()
 		transform.velocity.x = 0;
 	}
 
-	transform.pos += transform.velocity * m_configData.playerSpeed;
+	transform.pos += transform.velocity * transform.speed;
 
 
 	//Bullet Movement
 	for (auto& bullet : m_entities.GetEntities("Bullet"))
 	{
 		auto& transform = bullet->Get<CTransform>();
-		transform.pos += transform.velocity.Normalize() * m_configData.bulletSpeed;
+		transform.pos += transform.velocity.Normalize() * transform.speed;
 	}
 
 	//Enemy Movement
 	for (auto& enemy : m_entities.GetEntities("Enemy"))
 	{
 		auto& transform = enemy->Get<CTransform>();
-		int rSpeed = m_configData.enemyMinSpeed + rand() % (m_configData.enemyMaxSpeed + 1);
-		transform.pos += transform.velocity.Normalize() * rSpeed;
+		transform.pos += transform.velocity.Normalize() * transform.speed;
 
 		//Bound Check
 		if (transform.pos.y - m_configData.enemyShapeRadius <= 0 || transform.pos.y + m_configData.enemyShapeRadius >= m_configData.windowH)
@@ -160,7 +181,13 @@ void Game::SMovement()
 			transform.velocity.x *= -1;
 		}
 	}
-	
+
+	//Move Small Enemy
+	for (auto& sEnemy : m_entities.GetEntities("SmallEnemy"))
+	{
+		auto& transform = sEnemy->Get<CTransform>();
+		transform.pos += transform.velocity.Normalize() * transform.speed;
+	}
 }
 
 void Game::SLifeSpan()
@@ -169,6 +196,12 @@ void Game::SLifeSpan()
 	{
 		bullet->Get<CLifeSpan>().remaining--;
 		if (bullet->Get<CLifeSpan>().remaining <= 0) bullet->Destroy();
+	}
+
+	for (auto& sEnemy : m_entities.GetEntities("SmallEnemy"))
+	{
+		sEnemy->Get<CLifeSpan>().remaining--;
+		if (sEnemy->Get<CLifeSpan>().remaining <= 0) sEnemy->Destroy();
 	}
 }
 
@@ -286,14 +319,36 @@ void Game::SRender()
 		m_window.draw(shape.circle);
 	}
 
-	
-
 	for (auto& enemy : m_entities.GetEntities("Enemy"))
 	{
 		enemy->Get<CShape>().circle.setPosition(enemy->Get<CTransform>().pos);
 		enemy->Get<CTransform>().angle += 1.0f;
 		enemy->Get<CShape>().circle.setRotation(sf::degrees(enemy->Get<CTransform>().angle));
 		m_window.draw(enemy->Get<CShape>().circle);
+	}
+
+	for (auto& sEnemy : m_entities.GetEntities("SmallEnemy"))
+	{
+		auto& lifeSpan = sEnemy->Get<CLifeSpan>();
+		auto& transform = sEnemy->Get<CTransform>();
+		auto& shape = sEnemy->Get<CShape>();
+		if (lifeSpan.lifeSpan > 0)
+		{
+			uint8_t alpha = static_cast<uint8_t>((lifeSpan.remaining * 255) / lifeSpan.lifeSpan);
+			sf::Color fillColor = shape.circle.getFillColor();
+			sf::Color outColor = shape.circle.getOutlineColor();
+			fillColor.a = alpha;
+			outColor.a = alpha;
+			shape.circle.setFillColor(fillColor);
+			shape.circle.setOutlineColor(outColor);
+		}
+
+	
+		transform.angle += 1.0f;
+		shape.circle.setRotation(sf::degrees(sEnemy->Get<CTransform>().angle));
+		shape.circle.setPosition(transform.pos);
+
+		m_window.draw(sEnemy->Get<CShape>().circle);
 	}
 
 	ImGui::SFML::Render(m_window);
@@ -363,6 +418,8 @@ void Game::SGUI()
 					btnId++;
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(static_cast<float>(shapeColor.r)/255, static_cast<float>(shapeColor.g) / 255, static_cast<float>(shapeColor.b) / 255,1.0f));
 					if (ImGui::Button("D")) isDestroyed = true;
+
+
 					ImGui::PopStyleColor();
 					ImGui::PopID();
 					ImGui::SameLine();
@@ -410,9 +467,10 @@ void Game::SCollision()
 
 			if (bTransform.pos.Dist(eTransform.pos) < abs(bCollision.radius - eCollision.radius))
 			{
-				std::cerr << "Hit";
 				bullet->Destroy();
+				SpawnSmallEnemies(enemy);
 				enemy->Destroy();
+
 			}
 		}
 	}
