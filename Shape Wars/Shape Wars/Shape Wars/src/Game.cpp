@@ -8,9 +8,9 @@ Game::Game(const std::string& config)
 
 void Game::init(const std::string& path)
 {
-	m_fileData.ReadFromFile(path);
-	m_window.create(sf::VideoMode({ m_fileData.windowW, m_fileData.windowH }), "Shape Wars");
-	m_window.setFramerateLimit(m_fileData.frameLimit);
+	m_configData.ReadFromFile(path);
+	m_window.create(sf::VideoMode({ m_configData.windowW, m_configData.windowH }), "Shape Wars");
+	m_window.setFramerateLimit(m_configData.frameLimit);
 
 	ImGui::SFML::Init(m_window);
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
@@ -40,6 +40,7 @@ void Game::Run()
 		SMovement();
 		SCollision();
 		SUserInput();
+		SLifeSpan();
 		SGUI();
 		SRender();
 
@@ -54,10 +55,10 @@ void Game::SetPaused(bool value)
 
 void Game::SpawnPlayer()
 {
-	auto entity = m_entities.AddEntity("Player");
-	entity->Add<CTransform>(Vec2f(m_fileData.windowW / 2, m_fileData.windowH / 2), Vec2f(0, 0), 0.0f);
-	entity->Add<CShape>(m_fileData.playerShapeRadius, m_fileData.playerShapeVer, m_fileData.playerFillColor, m_fileData.playerOutColor, m_fileData.playerOutThickness);
-	entity->Add<CInput>();
+	auto player = m_entities.AddEntity("Player");
+	player->Add<CTransform>(Vec2f(m_configData.windowW / 2, m_configData.windowH / 2), Vec2f(0, 0), 0.0f);
+	player->Add<CShape>(m_configData.playerShapeRadius, m_configData.playerShapeVer, m_configData.playerFillColor, m_configData.playerOutColor, m_configData.playerOutThickness);
+	player->Add<CInput>();
 }
 
 void Game::SpawnEnemy()
@@ -72,9 +73,14 @@ void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 	
 }
 
-void Game::SpawnBullet(std::shared_ptr<Entity> entity, const Vec2f& mousePos)
+void Game::SpawnBullet(std::shared_ptr<Entity> player, const Vec2f& mousePos)
 {
-
+	auto bullet = m_entities.AddEntity("Bullet");
+	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
+	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0);
+	bullet->Add<CShape>(m_configData.bulletShapeRadius,m_configData.bulletShapeVer, m_configData.bulletFillColor, m_configData.bulletOutColor, m_configData.bulletOutThickness);
+	bullet->Add<CCollision>(m_configData.bulletCollisionRadius);
+	bullet->Add<CLifeSpan>(m_configData.bulletLifeSpan);
 }
 void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mousePos)
 {
@@ -94,25 +100,35 @@ void Game::SMovement()
 	if (transform.velocity.x != 0 && transform.velocity.y != 0) {transform.velocity = transform.velocity.Normalize();}
 
 	//Bound Check
-	if ((transform.pos.y - m_fileData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + m_fileData.playerShapeRadius >= m_fileData.windowH && transform.velocity.y > 0)
+	if ((transform.pos.y - m_configData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + m_configData.playerShapeRadius >= m_configData.windowH && transform.velocity.y > 0)
 	{
 		transform.velocity.y = 0;
 	}
 
-	if ((transform.pos.x - m_fileData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + m_fileData.playerShapeRadius >= m_fileData.windowW && transform.velocity.x > 0))
+	if ((transform.pos.x - m_configData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + m_configData.playerShapeRadius >= m_configData.windowW && transform.velocity.x > 0))
 	{
 		transform.velocity.x = 0;
 	}
 
-	transform.pos += transform.velocity * m_fileData.playerSpeed;
+	transform.pos += transform.velocity * m_configData.playerSpeed;
 
 
+	//Bullet Movement
+	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	{
+		auto& transform = bullet->Get<CTransform>();
+		transform.pos += transform.velocity.Normalize() * m_configData.bulletSpeed;
+	}
 	
 }
 
 void Game::SLifeSpan()
 {
-
+	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	{
+		bullet->Get<CLifeSpan>().remaining--;
+		if (bullet->Get<CLifeSpan>().remaining <= 0) bullet->Destroy();
+	}
 }
 
 void Game::SUserInput()
@@ -174,6 +190,25 @@ void Game::SUserInput()
 			}
 
 		}
+
+		else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
+		{
+			if (mousePressed->button == sf::Mouse::Button::Left)
+			{
+				inputC.shoot = true;
+				SpawnBullet(Player(), Vec2f(mousePressed->position.x, mousePressed->position.y));
+			}
+			
+		}
+
+		else if (const auto* mouseReleased = event->getIf<sf::Event::MouseButtonReleased>())
+		{
+			if (mouseReleased->button == sf::Mouse::Button::Left)
+			{
+				inputC.shoot = false;
+			}
+			
+		}
 	}
 
 	
@@ -188,6 +223,29 @@ void Game::SRender()
 	Player()->Get<CShape>().circle.setRotation(sf::degrees(Player()->Get<CTransform>().angle));
 
 	m_window.draw(Player()->Get<CShape>().circle);
+
+	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	{
+		auto& shape = bullet->Get<CShape>();
+		auto& lifeSpan = bullet->Get<CLifeSpan>();
+		auto& transform = bullet->Get<CTransform>();
+
+		if (lifeSpan.lifeSpan > 0)
+		{
+			uint8_t alpha = static_cast<uint8_t>((lifeSpan.remaining * 255) / lifeSpan.lifeSpan);
+			sf::Color fillColor = shape.circle.getFillColor();
+			sf::Color outColor = shape.circle.getOutlineColor();
+			fillColor.a = alpha;
+			outColor.a = alpha;
+			shape.circle.setFillColor(fillColor);
+			shape.circle.setOutlineColor(outColor);
+		}
+
+		shape.circle.setPosition(transform.pos);
+		m_window.draw(shape.circle);
+	}
+
+	
 
 	for (auto& enemy : m_entities.GetEntities("Enemy"))
 	{

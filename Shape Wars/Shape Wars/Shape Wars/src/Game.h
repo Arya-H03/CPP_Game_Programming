@@ -4,7 +4,7 @@
 #include "imgui.h"
 #include "imgui-sfml.h"
 #include <SFML/Window.hpp>
-#include "FileData.hpp"
+#include "ConfigData.hpp"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig  { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN,SMAX; };
@@ -20,7 +20,7 @@ class Game
 	PlayerConfig m_playerConfig;
 	EnemyConfig m_enemyConfig;
 	BulletConfig m_bulletConfig;
-	FileData m_fileData;
+	ConfigData m_configData;
 	sf::Clock m_clock;
 	int m_score = 0;
 	int m_currentFrame = 0;

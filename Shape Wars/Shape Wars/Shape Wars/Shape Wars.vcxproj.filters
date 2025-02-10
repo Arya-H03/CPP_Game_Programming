@@ -83,7 +83,7 @@
     <ClInclude Include="src\Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\FileData.hpp">
+    <ClInclude Include="src\ConfigData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

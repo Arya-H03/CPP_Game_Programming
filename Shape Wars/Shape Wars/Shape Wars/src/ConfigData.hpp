@@ -1,5 +1,5 @@
 #include <fstream>
-class FileData
+class ConfigData
 {
 public:
 
@@ -43,7 +43,7 @@ public:
 	sf::Color bulletOutColor;
 	int bulletOutThickness = 0;
 	int bulletShapeVer = 0;
-	int bulletLideSpan = 0;
+	int bulletLifeSpan = 0;
 
 
 	void ReadFromFile(const std::string filepath)
@@ -97,7 +97,7 @@ public:
 			if (temp == "Enemy")
 			{
 				int r, g, b;
-				if (!(fin >> enemyShapeRadius >> enemyCollisionRadius >> enemyMinSpeed >> enemyMaxSpeed >> r >> g >> b >> enemyOutThickness >> enemyMinShapeVer >> enemyMaxShapeVer >>smallEnemyLifeSpan >> spawnInterval))
+				if (!(fin >> enemyShapeRadius >> enemyCollisionRadius >> enemyMinSpeed >> enemyMaxSpeed >> r >> g >> b >> enemyOutThickness >> enemyMinShapeVer >> enemyMaxShapeVer >> smallEnemyLifeSpan >> spawnInterval))
 				{
 					std::cerr << "Could not read Enemy config";
 					return;
@@ -112,7 +112,7 @@ public:
 			{
 				int r1, g1, b1;
 				int r2, g2, b2;
-				if (!(fin >> bulletShapeRadius >> bulletCollisionRadius >> bulletSpeed >> r1 >> g1 >> b1 >> r2 >> g2 >> b2 >> bulletOutThickness >> bulletShapeVer >> bulletLideSpan))
+				if (!(fin >> bulletShapeRadius >> bulletCollisionRadius >> bulletSpeed >> r1 >> g1 >> b1 >> r2 >> g2 >> b2 >> bulletOutThickness >> bulletShapeVer >> bulletLifeSpan))
 				{
 					std::cerr << "Could not read Bullet config";
 					return;
