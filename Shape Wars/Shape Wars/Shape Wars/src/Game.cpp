@@ -90,8 +90,24 @@ void Game::SMovement()
 	transform.velocity.y = (input.down - input.up);
 	transform.velocity.x = (input.right - input.left);
 
+	//Normalzie 
 	if (transform.velocity.x != 0 && transform.velocity.y != 0) {transform.velocity = transform.velocity.Normalize();}
+
+	//Bound Check
+	if ((transform.pos.y - m_fileData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + m_fileData.playerShapeRadius >= m_fileData.windowH && transform.velocity.y > 0)
+	{
+		transform.velocity.y = 0;
+	}
+
+	if ((transform.pos.x - m_fileData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + m_fileData.playerShapeRadius >= m_fileData.windowW && transform.velocity.x > 0))
+	{
+		transform.velocity.x = 0;
+	}
+
 	transform.pos += transform.velocity * m_fileData.playerSpeed;
+
+
+	
 }
 
 void Game::SLifeSpan()
