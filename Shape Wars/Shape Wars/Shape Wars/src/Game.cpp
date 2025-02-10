@@ -333,7 +333,7 @@ void Game::SGUI()
 							sf::Color shapeColor = e->Get<CShape>().circle.getFillColor();
 							ImGui::PushID(btnId);
 							btnId++;
-							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(shapeColor.r / 255, shapeColor.g / 255, shapeColor.b / 255, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(static_cast<float>(shapeColor.r) / 255, static_cast<float>(shapeColor.g) / 255, static_cast<float>(shapeColor.b) / 255, 1.0f));
 							if (ImGui::Button("D")) isDestroyed = true;
 							ImGui::PopStyleColor();
 							ImGui::PopID();
@@ -361,7 +361,7 @@ void Game::SGUI()
 					sf::Color shapeColor = e->Get<CShape>().circle.getFillColor();
 					ImGui::PushID(btnId);
 					btnId++;
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(shapeColor.r / 255, shapeColor.g / 255, shapeColor.b /255, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(static_cast<float>(shapeColor.r)/255, static_cast<float>(shapeColor.g) / 255, static_cast<float>(shapeColor.b) / 255,1.0f));
 					if (ImGui::Button("D")) isDestroyed = true;
 					ImGui::PopStyleColor();
 					ImGui::PopID();
@@ -399,6 +399,22 @@ void Game::SEnemySpawner()
 
 void Game::SCollision()
 {
+	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	{
+		auto& bTransform = bullet->Get<CTransform>();
+		auto& bCollision = bullet->Get<CCollision>();
+		for (auto & enemy : m_entities.GetEntities("Enemy"))
+		{
+			auto& eTransform = enemy->Get<CTransform>();
+			auto& eCollision = enemy->Get<CCollision>();
 
+			if (bTransform.pos.Dist(eTransform.pos) < abs(bCollision.radius - eCollision.radius))
+			{
+				std::cerr << "Hit";
+				bullet->Destroy();
+				enemy->Destroy();
+			}
+		}
+	}
 }
 
