@@ -18,18 +18,20 @@ void Game::init(const std::string& path)
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
 	SpawnPlayer();
-	
+
 
 }
 
 std::shared_ptr<Entity> Game::Player()
 {
 	auto& players = m_entities.GetEntities("Player");
+	if (players.size() <= 0) return nullptr;
 	return players.front();
 }
 
 void Game::Run()
 {
+	m_audioData.PlayMusic(10);
 	while (m_running)
 	{
 		m_entities.Update();
@@ -56,7 +58,7 @@ void Game::SetPaused(bool value)
 void Game::SpawnPlayer()
 {
 	auto player = m_entities.AddEntity("Player");
-	player->Add<CTransform>(Vec2f(m_configData.windowW / 2, m_configData.windowH / 2), Vec2f(0, 0), 0.0f,m_configData.playerSpeed);
+	player->Add<CTransform>(Vec2f(m_configData.windowW / 2, m_configData.windowH / 2), Vec2f(0, 0), 0.0f, m_configData.playerSpeed);
 	player->Add<CShape>(m_configData.playerShapeRadius, m_configData.playerShapeVer, m_configData.playerFillColor, m_configData.playerOutColor, m_configData.playerOutThickness);
 	player->Add<CInput>();
 }
@@ -66,7 +68,7 @@ void Game::SpawnEnemy()
 	//Random Pos
 	int rXpos = m_configData.enemyShapeRadius + rand() % (m_configData.windowW - m_configData.enemyShapeRadius + 1);
 	int rYpos = m_configData.enemyShapeRadius + rand() % (m_configData.windowH - m_configData.enemyShapeRadius + 1);
-	
+
 	//Random Vel
 	int rXVel = -1 + rand() % 3;
 	int rYVel = -1 + rand() % 3;
@@ -82,7 +84,7 @@ void Game::SpawnEnemy()
 	b = rand() % 256;
 
 	//Random Ver
-	int rVer = m_configData.enemyMinShapeVer + rand() % (m_configData .enemyMaxShapeVer +1);
+	int rVer = m_configData.enemyMinShapeVer + rand() % (m_configData.enemyMaxShapeVer + 1);
 
 	//Random Speed
 	float rSpeed = m_configData.enemyMinSpeed + rand() % (m_configData.enemyMaxSpeed + 1);
@@ -106,25 +108,27 @@ void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 		Vec2f vel(std::cos(angle) * shape.circle.getRadius(), std::sin(angle) * shape.circle.getRadius());
 
 		auto sEnemy = m_entities.AddEntity("SmallEnemy");
-		sEnemy->Add<CTransform>(transform.pos, vel,0, transform.speed);
+		sEnemy->Add<CTransform>(transform.pos, vel, 0, transform.speed);
 		sEnemy->Add<CShape>(shape.circle.getRadius() / 2, shape.circle.getPointCount(), shape.circle.getFillColor(), shape.circle.getOutlineColor(), shape.circle.getOutlineThickness() / 2);
 		sEnemy->Add<CCollision>(entity->Get<CCollision>().radius / 2);
 		sEnemy->Add<CLifeSpan>(m_configData.smallEnemyLifeSpan);
 	}
 
-	
 
-	
+
+
 }
 
 void Game::SpawnBullet(std::shared_ptr<Entity> player, const Vec2f& mousePos)
 {
 	auto bullet = m_entities.AddEntity("Bullet");
 	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
-	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0,m_configData.bulletSpeed);
-	bullet->Add<CShape>(m_configData.bulletShapeRadius,m_configData.bulletShapeVer, m_configData.bulletFillColor, m_configData.bulletOutColor, m_configData.bulletOutThickness);
+	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0, m_configData.bulletSpeed);
+	bullet->Add<CShape>(m_configData.bulletShapeRadius, m_configData.bulletShapeVer, m_configData.bulletFillColor, m_configData.bulletOutColor, m_configData.bulletOutThickness);
 	bullet->Add<CCollision>(m_configData.bulletCollisionRadius);
 	bullet->Add<CLifeSpan>(m_configData.bulletLifeSpan);
+
+	m_audioData.PlayShootSFX(200);
 }
 void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mousePos)
 {
@@ -134,28 +138,30 @@ void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mous
 void Game::SMovement()
 {
 	// Player Movement
-	auto& transform = Player()->Get<CTransform>();
-	auto& input = Player()->Get<CInput>();
-
-	transform.velocity.y = (input.down - input.up);
-	transform.velocity.x = (input.right - input.left);
-
-	//Normalzie 
-	if (transform.velocity.x != 0 && transform.velocity.y != 0) {transform.velocity = transform.velocity.Normalize();}
-
-	//Bound Check
-	if ((transform.pos.y - m_configData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + m_configData.playerShapeRadius >= m_configData.windowH && transform.velocity.y > 0)
+	if (Player())
 	{
-		transform.velocity.y = 0;
+		auto& transform = Player()->Get<CTransform>();
+		auto& input = Player()->Get<CInput>();
+
+		transform.velocity.y = (input.down - input.up);
+		transform.velocity.x = (input.right - input.left);
+
+		//Normalzie 
+		if (transform.velocity.x != 0 && transform.velocity.y != 0) { transform.velocity = transform.velocity.Normalize(); }
+
+		//Bound Check
+		if ((transform.pos.y - m_configData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + m_configData.playerShapeRadius >= m_configData.windowH && transform.velocity.y > 0)
+		{
+			transform.velocity.y = 0;
+		}
+
+		if ((transform.pos.x - m_configData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + m_configData.playerShapeRadius >= m_configData.windowW && transform.velocity.x > 0))
+		{
+			transform.velocity.x = 0;
+		}
+
+		transform.pos += transform.velocity * transform.speed;
 	}
-
-	if ((transform.pos.x - m_configData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + m_configData.playerShapeRadius >= m_configData.windowW && transform.velocity.x > 0))
-	{
-		transform.velocity.x = 0;
-	}
-
-	transform.pos += transform.velocity * transform.speed;
-
 
 	//Bullet Movement
 	for (auto& bullet : m_entities.GetEntities("Bullet"))
@@ -207,11 +213,12 @@ void Game::SLifeSpan()
 
 void Game::SUserInput()
 {
+	if (!Player()) return;
+
 	auto& inputC = Player()->Get<CInput>();
 
 	while (const auto event = m_window.pollEvent())
 	{
-		
 		ImGui::SFML::ProcessEvent(m_window, *event);
 
 		if (event->is<sf::Event::Closed>())
@@ -222,11 +229,11 @@ void Game::SUserInput()
 
 		else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
 		{
-			
+
 			switch (keyPressed->scancode)
 			{
 			case sf::Keyboard::Scancode::W:
-				inputC.up = true;				
+				inputC.up = true;
 				break;
 			case sf::Keyboard::Scancode::S:
 				inputC.down = true;
@@ -240,7 +247,7 @@ void Game::SUserInput()
 			default:
 				break;
 			}
-		
+
 		}
 
 		else if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
@@ -272,7 +279,7 @@ void Game::SUserInput()
 				inputC.shoot = true;
 				SpawnBullet(Player(), Vec2f(mousePressed->position.x, mousePressed->position.y));
 			}
-			
+
 		}
 
 		else if (const auto* mouseReleased = event->getIf<sf::Event::MouseButtonReleased>())
@@ -281,22 +288,25 @@ void Game::SUserInput()
 			{
 				inputC.shoot = false;
 			}
-			
+
 		}
 	}
 
-	
+
 }
 
 void Game::SRender()
 {
 	m_window.clear();
+	if (Player())
+	{
+		Player()->Get<CShape>().circle.setPosition(Player()->Get<CTransform>().pos);
+		Player()->Get<CTransform>().angle += 1.0f;
+		Player()->Get<CShape>().circle.setRotation(sf::degrees(Player()->Get<CTransform>().angle));
 
-	Player()->Get<CShape>().circle.setPosition(Player()->Get<CTransform>().pos);
-	Player()->Get<CTransform>().angle += 1.0f;
-	Player()->Get<CShape>().circle.setRotation(sf::degrees(Player()->Get<CTransform>().angle));
+		m_window.draw(Player()->Get<CShape>().circle);
+	}
 
-	m_window.draw(Player()->Get<CShape>().circle);
 
 	for (auto& bullet : m_entities.GetEntities("Bullet"))
 	{
@@ -343,7 +353,7 @@ void Game::SRender()
 			shape.circle.setOutlineColor(outColor);
 		}
 
-	
+
 		transform.angle += 1.0f;
 		shape.circle.setRotation(sf::degrees(sEnemy->Get<CTransform>().angle));
 		shape.circle.setPosition(transform.pos);
@@ -364,9 +374,21 @@ void Game::SGUI()
 	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 	if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
 	{
-		if (ImGui::BeginTabItem("Systems"))
+		if (ImGui::BeginTabItem("Game"))
 		{
-			ImGui::Text("This is the Systems tab!\nblah blah blah blah blah");
+
+			ImGui::Text("%s%i", "Score:", m_score);
+			int clicked = 0;
+			if (ImGui::Button("Replay")) clicked++;
+
+			if (clicked & 1)
+			{
+				if (Player()) Player()->Destroy();
+				SResetGame();
+				clicked = 0;
+			}
+
+
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Entities"))
@@ -416,7 +438,7 @@ void Game::SGUI()
 					sf::Color shapeColor = e->Get<CShape>().circle.getFillColor();
 					ImGui::PushID(btnId);
 					btnId++;
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(static_cast<float>(shapeColor.r)/255, static_cast<float>(shapeColor.g) / 255, static_cast<float>(shapeColor.b) / 255,1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(static_cast<float>(shapeColor.r) / 255, static_cast<float>(shapeColor.g) / 255, static_cast<float>(shapeColor.b) / 255, 1.0f));
 					if (ImGui::Button("D")) isDestroyed = true;
 
 
@@ -431,17 +453,22 @@ void Game::SGUI()
 					ImGui::SameLine();
 					//Position
 					ImGui::Text("(%.2f,%.2f)", e->Get<CTransform>().pos.x, e->Get<CTransform>().pos.y);
-					
+
 					if (isDestroyed) e->Destroy();
 				}
-				
+
 			}
 
 			ImGui::EndTabItem();
 		}
 		ImGui::EndTabBar();
 	}
+
+
+
 	ImGui::End();
+
+
 }
 
 void Game::SEnemySpawner()
@@ -451,7 +478,7 @@ void Game::SEnemySpawner()
 		SpawnEnemy();
 		m_lastEnemySpawnTime = m_currentFrame;
 	}
-	
+
 }
 
 void Game::SCollision()
@@ -460,7 +487,7 @@ void Game::SCollision()
 	{
 		auto& bTransform = bullet->Get<CTransform>();
 		auto& bCollision = bullet->Get<CCollision>();
-		for (auto & enemy : m_entities.GetEntities("Enemy"))
+		for (auto& enemy : m_entities.GetEntities("Enemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -470,9 +497,72 @@ void Game::SCollision()
 				bullet->Destroy();
 				SpawnSmallEnemies(enemy);
 				enemy->Destroy();
+				m_audioData.PlayHitSFX(10);
+				m_score++;
+			}
+		}
+
+		for (auto& enemy : m_entities.GetEntities("SmallEnemy"))
+		{
+			auto& eTransform = enemy->Get<CTransform>();
+			auto& eCollision = enemy->Get<CCollision>();
+
+			if (bTransform.pos.Dist(eTransform.pos) < abs(bCollision.radius - eCollision.radius))
+			{
+				bullet->Destroy();
+				enemy->Destroy();
+				m_audioData.PlayHitSFX(10);
+				m_score++;
 
 			}
 		}
 	}
+
+	if (Player())
+	{
+		auto& pTransform = Player()->Get<CTransform>();
+		auto& pCollision = Player()->Get<CCollision>();
+
+		for (auto& enemy : m_entities.GetEntities("Enemy"))
+		{
+			auto& eTransform = enemy->Get<CTransform>();
+			auto& eCollision = enemy->Get<CCollision>();
+
+			if (pTransform.pos.Dist(eTransform.pos) < abs(pCollision.radius - eCollision.radius))
+			{
+
+				enemy->Destroy();
+				Player()->Destroy();
+				m_audioData.PlayDeathSFX(15);
+
+			}
+		}
+
+		for (auto& smallEnemy : m_entities.GetEntities("SmallEnemy"))
+		{
+			auto& eTransform = smallEnemy->Get<CTransform>();
+			auto& eCollision = smallEnemy->Get<CCollision>();
+
+			if (pTransform.pos.Dist(eTransform.pos) < abs(pCollision.radius - eCollision.radius))
+			{
+
+				smallEnemy->Destroy();
+				Player()->Destroy();
+				m_audioData.PlayDeathSFX(15);
+
+			}
+		}
+	}
+
 }
 
+void Game::SResetGame()
+{
+	for (auto& entity : m_entities.GetEntities())
+	{
+		entity->Destroy();
+		m_score = 0;
+
+		SpawnPlayer();
+	}
+}

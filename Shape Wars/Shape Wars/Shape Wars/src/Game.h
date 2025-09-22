@@ -5,6 +5,7 @@
 #include "imgui-sfml.h"
 #include <SFML/Window.hpp>
 #include "ConfigData.hpp"
+#include "AudioData.hpp"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig  { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN,SMAX; };
@@ -21,6 +22,7 @@ class Game
 	EnemyConfig m_enemyConfig;
 	BulletConfig m_bulletConfig;
 	ConfigData m_configData;
+	AudioData m_audioData;
 	sf::Clock m_clock;
 	int m_score = 0;
 	int m_currentFrame = 0;
@@ -38,7 +40,7 @@ class Game
 	void SGUI();
 	void SEnemySpawner();
 	void SCollision();
-
+	void SResetGame();
 	void SpawnPlayer();
 	void SpawnEnemy();
 	void SpawnSmallEnemies(std::shared_ptr<Entity> entity);

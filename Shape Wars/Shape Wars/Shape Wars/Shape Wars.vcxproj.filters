@@ -86,6 +86,9 @@
     <ClInclude Include="src\ConfigData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\AudioData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\config.txt" />
