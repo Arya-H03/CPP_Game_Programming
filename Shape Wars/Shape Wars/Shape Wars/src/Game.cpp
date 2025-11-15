@@ -1,42 +1,38 @@
 #include "Game.h"
 #include<iostream>
 
-
-Game::Game(const std::string& config)
+Game::Game(const std::string& config) : configData(config), movementSystem(configData)
 {
-	init(config);
+	init();
 }
 
-void Game::init(const std::string& path)
+void Game::init()
 {
-	m_configData.ReadFromFile(path);
-	m_window.create(sf::VideoMode({ m_configData.windowW, m_configData.windowH }), "Shape Wars");
-	m_window.setFramerateLimit(m_configData.frameLimit);
+	window.create(sf::VideoMode({ configData.windowW, configData.windowH }), "Shape Wars");
+	window.setFramerateLimit(configData.frameLimit);
 
-	ImGui::SFML::Init(m_window);
+	ImGui::SFML::Init(window);
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
+	audioData.PlayMusic(10);
 	SpawnPlayer();
-
-
 }
 
 std::shared_ptr<Entity> Game::Player()
 {
-	auto& players = m_entities.GetEntities("Player");
+	auto& players = entities.GetEntities("Player");
 	if (players.size() <= 0) return nullptr;
 	return players.front();
 }
 
 void Game::Run()
 {
-	m_audioData.PlayMusic(10);
-	while (m_running)
-	{
-		m_entities.Update();
 
-		ImGui::SFML::Update(m_window, m_clock.restart());
+	while (isGameRunning)
+	{
+		entities.Update();
+		ImGui::SFML::Update(window, clock.restart());
 
 		SEnemySpawner();
 		SMovement();
@@ -46,7 +42,7 @@ void Game::Run()
 		SGUI();
 		SRender();
 
-		m_currentFrame++;
+		currentFrame++;
 	}
 }
 
@@ -57,17 +53,17 @@ void Game::SetPaused(bool value)
 
 void Game::SpawnPlayer()
 {
-	auto player = m_entities.AddEntity("Player");
-	player->Add<CTransform>(Vec2f(m_configData.windowW / 2, m_configData.windowH / 2), Vec2f(0, 0), 0.0f, m_configData.playerSpeed);
-	player->Add<CShape>(m_configData.playerShapeRadius, m_configData.playerShapeVer, m_configData.playerFillColor, m_configData.playerOutColor, m_configData.playerOutThickness);
+	auto player = entities.AddEntity("Player");
+	player->Add<CTransform>(Vec2f(configData.windowW / 2, configData.windowH / 2), Vec2f(0, 0), 0.0f, configData.playerSpeed);
+	player->Add<CShape>(configData.playerShapeRadius, configData.playerShapeVer, configData.playerFillColor, configData.playerOutColor, configData.playerOutThickness);
 	player->Add<CInput>();
 }
 
 void Game::SpawnEnemy()
 {
 	//Random Pos
-	int rXpos = m_configData.enemyShapeRadius + rand() % (m_configData.windowW - m_configData.enemyShapeRadius + 1);
-	int rYpos = m_configData.enemyShapeRadius + rand() % (m_configData.windowH - m_configData.enemyShapeRadius + 1);
+	int rXpos = configData.enemyShapeRadius + rand() % (configData.windowW - configData.enemyShapeRadius + 1);
+	int rYpos = configData.enemyShapeRadius + rand() % (configData.windowH - configData.enemyShapeRadius + 1);
 
 	//Random Vel
 	int rXVel = -1 + rand() % 3;
@@ -84,15 +80,15 @@ void Game::SpawnEnemy()
 	b = rand() % 256;
 
 	//Random Ver
-	int rVer = m_configData.enemyMinShapeVer + rand() % (m_configData.enemyMaxShapeVer + 1);
+	int rVer = configData.enemyMinShapeVer + rand() % (configData.enemyMaxShapeVer + 1);
 
 	//Random Speed
-	float rSpeed = m_configData.enemyMinSpeed + rand() % (m_configData.enemyMaxSpeed + 1);
+	float rSpeed = configData.enemyMinSpeed + rand() % (configData.enemyMaxSpeed + 1);
 
-	auto entity = m_entities.AddEntity("Enemy");
+	auto entity = entities.AddEntity("Enemy");
 	entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0, rSpeed);
-	entity->Add<CShape>(m_configData.enemyShapeRadius, rVer, sf::Color(r, g, b), m_configData.enemyOutColor, 4.0f);
-	entity->Add<CCollision>(m_configData.enemyCollisionRadius);
+	entity->Add<CShape>(configData.enemyShapeRadius, rVer, sf::Color(r, g, b), configData.enemyOutColor, 4.0f);
+	entity->Add<CCollision>(configData.enemyCollisionRadius);
 }
 
 void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
@@ -107,11 +103,11 @@ void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 		float angle = ((90 - (a / 2)) - (a * i)) * (3.14159265358979323846 / 180.0);
 		Vec2f vel(std::cos(angle) * shape.circle.getRadius(), std::sin(angle) * shape.circle.getRadius());
 
-		auto sEnemy = m_entities.AddEntity("SmallEnemy");
+		auto sEnemy = entities.AddEntity("SmallEnemy");
 		sEnemy->Add<CTransform>(transform.pos, vel, 0, transform.speed);
 		sEnemy->Add<CShape>(shape.circle.getRadius() / 2, shape.circle.getPointCount(), shape.circle.getFillColor(), shape.circle.getOutlineColor(), shape.circle.getOutlineThickness() / 2);
 		sEnemy->Add<CCollision>(entity->Get<CCollision>().radius / 2);
-		sEnemy->Add<CLifeSpan>(m_configData.smallEnemyLifeSpan);
+		sEnemy->Add<CLifeSpan>(configData.smallEnemyLifeSpan);
 	}
 
 
@@ -121,14 +117,14 @@ void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 
 void Game::SpawnBullet(std::shared_ptr<Entity> player, const Vec2f& mousePos)
 {
-	auto bullet = m_entities.AddEntity("Bullet");
+	auto bullet = entities.AddEntity("Bullet");
 	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
-	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0, m_configData.bulletSpeed);
-	bullet->Add<CShape>(m_configData.bulletShapeRadius, m_configData.bulletShapeVer, m_configData.bulletFillColor, m_configData.bulletOutColor, m_configData.bulletOutThickness);
-	bullet->Add<CCollision>(m_configData.bulletCollisionRadius);
-	bullet->Add<CLifeSpan>(m_configData.bulletLifeSpan);
+	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0, configData.bulletSpeed);
+	bullet->Add<CShape>(configData.bulletShapeRadius, configData.bulletShapeVer, configData.bulletFillColor, configData.bulletOutColor, configData.bulletOutThickness);
+	bullet->Add<CCollision>(configData.bulletCollisionRadius);
+	bullet->Add<CLifeSpan>(configData.bulletLifeSpan);
 
-	m_audioData.PlayShootSFX(200);
+	audioData.PlayShootSFX(200);
 }
 void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mousePos)
 {
@@ -137,74 +133,37 @@ void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mous
 
 void Game::SMovement()
 {
-	// Player Movement
-	if (Player())
+	std::shared_ptr<Entity> player = Player();
+	if (player) movementSystem.UpdatePlayerMovement(*player);
+
+	for (auto& bullet : entities.GetEntities("Bullet"))
 	{
-		auto& transform = Player()->Get<CTransform>();
-		auto& input = Player()->Get<CInput>();
-
-		transform.velocity.y = (input.down - input.up);
-		transform.velocity.x = (input.right - input.left);
-
-		//Normalzie 
-		if (transform.velocity.x != 0 && transform.velocity.y != 0) { transform.velocity = transform.velocity.Normalize(); }
-
-		//Bound Check
-		if ((transform.pos.y - m_configData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + m_configData.playerShapeRadius >= m_configData.windowH && transform.velocity.y > 0)
-		{
-			transform.velocity.y = 0;
-		}
-
-		if ((transform.pos.x - m_configData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + m_configData.playerShapeRadius >= m_configData.windowW && transform.velocity.x > 0))
-		{
-			transform.velocity.x = 0;
-		}
-
-		transform.pos += transform.velocity * transform.speed;
+		movementSystem.UpdateBulletMovement(*bullet);
 	}
 
-	//Bullet Movement
-	for (auto& bullet : m_entities.GetEntities("Bullet"))
+
+	for (auto& enemy : entities.GetEntities("Enemy"))
 	{
-		auto& transform = bullet->Get<CTransform>();
-		transform.pos += transform.velocity.Normalize() * transform.speed;
+		movementSystem.UpdateEnemyMovement(*enemy);
 	}
 
-	//Enemy Movement
-	for (auto& enemy : m_entities.GetEntities("Enemy"))
+
+	for (auto& smallEnemy : entities.GetEntities("SmallEnemy"))
 	{
-		auto& transform = enemy->Get<CTransform>();
-		transform.pos += transform.velocity.Normalize() * transform.speed;
-
-		//Bound Check
-		if (transform.pos.y - m_configData.enemyShapeRadius <= 0 || transform.pos.y + m_configData.enemyShapeRadius >= m_configData.windowH)
-		{
-			transform.velocity.y *= -1;
-		}
-
-		if (transform.pos.x - m_configData.enemyShapeRadius <= 0 || transform.pos.x + m_configData.enemyShapeRadius >= m_configData.windowW)
-		{
-			transform.velocity.x *= -1;
-		}
+		movementSystem.UpdateSmallEnemyMovement(*smallEnemy);
 	}
 
-	//Move Small Enemy
-	for (auto& sEnemy : m_entities.GetEntities("SmallEnemy"))
-	{
-		auto& transform = sEnemy->Get<CTransform>();
-		transform.pos += transform.velocity.Normalize() * transform.speed;
-	}
 }
 
 void Game::SLifeSpan()
 {
-	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	for (auto& bullet : entities.GetEntities("Bullet"))
 	{
 		bullet->Get<CLifeSpan>().remaining--;
 		if (bullet->Get<CLifeSpan>().remaining <= 0) bullet->Destroy();
 	}
 
-	for (auto& sEnemy : m_entities.GetEntities("SmallEnemy"))
+	for (auto& sEnemy : entities.GetEntities("SmallEnemy"))
 	{
 		sEnemy->Get<CLifeSpan>().remaining--;
 		if (sEnemy->Get<CLifeSpan>().remaining <= 0) sEnemy->Destroy();
@@ -217,14 +176,14 @@ void Game::SUserInput()
 
 	auto& inputC = Player()->Get<CInput>();
 
-	while (const auto event = m_window.pollEvent())
+	while (const auto event = window.pollEvent())
 	{
-		ImGui::SFML::ProcessEvent(m_window, *event);
+		ImGui::SFML::ProcessEvent(window, *event);
 
 		if (event->is<sf::Event::Closed>())
 		{
-			m_running = false;
-			m_window.close();
+			isGameRunning = false;
+			window.close();
 		}
 
 		else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
@@ -297,18 +256,17 @@ void Game::SUserInput()
 
 void Game::SRender()
 {
-	m_window.clear();
+	window.clear();
 	if (Player())
 	{
 		Player()->Get<CShape>().circle.setPosition(Player()->Get<CTransform>().pos);
 		Player()->Get<CTransform>().angle += 1.0f;
 		Player()->Get<CShape>().circle.setRotation(sf::degrees(Player()->Get<CTransform>().angle));
 
-		m_window.draw(Player()->Get<CShape>().circle);
+		window.draw(Player()->Get<CShape>().circle);
 	}
 
-
-	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	for (auto& bullet : entities.GetEntities("Bullet"))
 	{
 		auto& shape = bullet->Get<CShape>();
 		auto& lifeSpan = bullet->Get<CLifeSpan>();
@@ -326,18 +284,18 @@ void Game::SRender()
 		}
 
 		shape.circle.setPosition(transform.pos);
-		m_window.draw(shape.circle);
+		window.draw(shape.circle);
 	}
 
-	for (auto& enemy : m_entities.GetEntities("Enemy"))
+	for (auto& enemy : entities.GetEntities("Enemy"))
 	{
 		enemy->Get<CShape>().circle.setPosition(enemy->Get<CTransform>().pos);
 		enemy->Get<CTransform>().angle += 1.0f;
 		enemy->Get<CShape>().circle.setRotation(sf::degrees(enemy->Get<CTransform>().angle));
-		m_window.draw(enemy->Get<CShape>().circle);
+		window.draw(enemy->Get<CShape>().circle);
 	}
 
-	for (auto& sEnemy : m_entities.GetEntities("SmallEnemy"))
+	for (auto& sEnemy : entities.GetEntities("SmallEnemy"))
 	{
 		auto& lifeSpan = sEnemy->Get<CLifeSpan>();
 		auto& transform = sEnemy->Get<CTransform>();
@@ -358,14 +316,11 @@ void Game::SRender()
 		shape.circle.setRotation(sf::degrees(sEnemy->Get<CTransform>().angle));
 		shape.circle.setPosition(transform.pos);
 
-		m_window.draw(sEnemy->Get<CShape>().circle);
+		window.draw(sEnemy->Get<CShape>().circle);
 	}
 
-	ImGui::SFML::Render(m_window);
-
-	m_window.display();
-
-
+	ImGui::SFML::Render(window);
+	window.display();
 }
 
 void Game::SGUI()
@@ -377,7 +332,7 @@ void Game::SGUI()
 		if (ImGui::BeginTabItem("Game"))
 		{
 
-			ImGui::Text("%s%i", "Score:", m_score);
+			ImGui::Text("%s%i", "Score:", score);
 			int clicked = 0;
 			if (ImGui::Button("Replay")) clicked++;
 
@@ -387,8 +342,6 @@ void Game::SGUI()
 				SResetGame();
 				clicked = 0;
 			}
-
-
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Entities"))
@@ -396,7 +349,7 @@ void Game::SGUI()
 			int btnId = 0;
 			if (ImGui::CollapsingHeader("Entities by Tags"))
 			{
-				for (auto& [tag, entityVec] : m_entities.GetEntityMap())
+				for (auto& [tag, entityVec] : entities.GetEntityMap())
 				{
 					std::string headerName = tag;
 					if (ImGui::CollapsingHeader(headerName.c_str()))
@@ -430,7 +383,7 @@ void Game::SGUI()
 			if (ImGui::CollapsingHeader("All Entities"))
 			{
 				bool isDestroyed = false;
-				for (auto& e : m_entities.GetEntities())
+				for (auto& e : entities.GetEntities())
 				{
 					//Delete btn
 					static int clicked = 0;
@@ -456,38 +409,31 @@ void Game::SGUI()
 
 					if (isDestroyed) e->Destroy();
 				}
-
 			}
-
 			ImGui::EndTabItem();
 		}
 		ImGui::EndTabBar();
 	}
-
-
-
 	ImGui::End();
-
-
 }
 
 void Game::SEnemySpawner()
 {
-	if (m_currentFrame - m_lastEnemySpawnTime >= m_configData.spawnInterval)
+	if (currentFrame - lastEnemySpawnTime >= configData.spawnInterval)
 	{
 		SpawnEnemy();
-		m_lastEnemySpawnTime = m_currentFrame;
+		lastEnemySpawnTime = currentFrame;
 	}
 
 }
 
 void Game::SCollision()
 {
-	for (auto& bullet : m_entities.GetEntities("Bullet"))
+	for (auto& bullet : entities.GetEntities("Bullet"))
 	{
 		auto& bTransform = bullet->Get<CTransform>();
 		auto& bCollision = bullet->Get<CCollision>();
-		for (auto& enemy : m_entities.GetEntities("Enemy"))
+		for (auto& enemy : entities.GetEntities("Enemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -497,12 +443,12 @@ void Game::SCollision()
 				bullet->Destroy();
 				SpawnSmallEnemies(enemy);
 				enemy->Destroy();
-				m_audioData.PlayHitSFX(10);
-				m_score++;
+				audioData.PlayHitSFX(10);
+				score++;
 			}
 		}
 
-		for (auto& enemy : m_entities.GetEntities("SmallEnemy"))
+		for (auto& enemy : entities.GetEntities("SmallEnemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -511,8 +457,8 @@ void Game::SCollision()
 			{
 				bullet->Destroy();
 				enemy->Destroy();
-				m_audioData.PlayHitSFX(10);
-				m_score++;
+				audioData.PlayHitSFX(10);
+				score++;
 
 			}
 		}
@@ -523,7 +469,7 @@ void Game::SCollision()
 		auto& pTransform = Player()->Get<CTransform>();
 		auto& pCollision = Player()->Get<CCollision>();
 
-		for (auto& enemy : m_entities.GetEntities("Enemy"))
+		for (auto& enemy : entities.GetEntities("Enemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -533,12 +479,12 @@ void Game::SCollision()
 
 				enemy->Destroy();
 				Player()->Destroy();
-				m_audioData.PlayDeathSFX(15);
+				audioData.PlayDeathSFX(15);
 
 			}
 		}
 
-		for (auto& smallEnemy : m_entities.GetEntities("SmallEnemy"))
+		for (auto& smallEnemy : entities.GetEntities("SmallEnemy"))
 		{
 			auto& eTransform = smallEnemy->Get<CTransform>();
 			auto& eCollision = smallEnemy->Get<CCollision>();
@@ -548,7 +494,7 @@ void Game::SCollision()
 
 				smallEnemy->Destroy();
 				Player()->Destroy();
-				m_audioData.PlayDeathSFX(15);
+				audioData.PlayDeathSFX(15);
 
 			}
 		}
@@ -558,11 +504,10 @@ void Game::SCollision()
 
 void Game::SResetGame()
 {
-	for (auto& entity : m_entities.GetEntities())
+	for (auto& entity : entities.GetEntities())
 	{
 		entity->Destroy();
-		m_score = 0;
-
-		SpawnPlayer();
 	}
+	score = 0;
+	SpawnPlayer();
 }

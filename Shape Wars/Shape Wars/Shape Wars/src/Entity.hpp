@@ -83,5 +83,4 @@ public:
 	{
 		return Get<T>().exists;
 	}
-
 };

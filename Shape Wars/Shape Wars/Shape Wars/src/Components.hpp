@@ -83,5 +83,4 @@ public:
 	bool shoot = false;
 
 	CInput() = default;
-	
 };

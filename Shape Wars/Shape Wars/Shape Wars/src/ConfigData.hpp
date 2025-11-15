@@ -1,51 +1,11 @@
+#pragma once
 #include <fstream>
+#include <iostream>
+#include <SFML/Graphics.hpp>
+
 class ConfigData
 {
-public:
-
-	//Window Data
-	unsigned int windowH = 0;
-	unsigned int windowW = 0;
-	int frameLimit = 0;
-	int fullScreen = 0; //0 is no 1 is yes
-
-	//Font Data
-	std::string fontFile = "";
-	int fontSize = 0;
-	sf::Color fontColor;
-
-	//Player Data
-	int playerShapeRadius = 0;
-	int playerCollisionRadius = 0;
-	float playerSpeed = 0;
-	sf::Color playerFillColor;
-	sf::Color playerOutColor;
-	int playerOutThickness = 0;
-	int playerShapeVer = 0;
-
-	//Enemy Data
-	int enemyShapeRadius = 0;
-	int enemyCollisionRadius = 0;
-	int enemyMaxSpeed = 0;
-	int enemyMinSpeed = 0;
-	sf::Color enemyOutColor;
-	int enemyOutThickness = 0;
-	int enemyMaxShapeVer = 0;
-	int enemyMinShapeVer = 0;
-	int smallEnemyLifeSpan = 0;
-	int spawnInterval = 0;
-
-	//Bullet Data
-	int bulletShapeRadius = 0;
-	int bulletCollisionRadius = 0;
-	float bulletSpeed = 0;
-	sf::Color bulletFillColor;
-	sf::Color bulletOutColor;
-	int bulletOutThickness = 0;
-	int bulletShapeVer = 0;
-	int bulletLifeSpan = 0;
-
-
+private:
 	void ReadFromFile(const std::string filepath)
 	{
 		std::string temp;
@@ -125,5 +85,55 @@ public:
 			}
 		}
 	}
+public:
+
+	//Window Data
+	unsigned int windowH = 0;
+	unsigned int windowW = 0;
+	int frameLimit = 0;
+	int fullScreen = 0; //0 is no 1 is yes
+
+	//Font Data
+	std::string fontFile = "";
+	int fontSize = 0;
+	sf::Color fontColor;
+
+	//Player Data
+	int playerShapeRadius = 0;
+	int playerCollisionRadius = 0;
+	float playerSpeed = 0;
+	sf::Color playerFillColor;
+	sf::Color playerOutColor;
+	int playerOutThickness = 0;
+	int playerShapeVer = 0;
+
+	//Enemy Data
+	int enemyShapeRadius = 0;
+	int enemyCollisionRadius = 0;
+	int enemyMaxSpeed = 0;
+	int enemyMinSpeed = 0;
+	sf::Color enemyOutColor;
+	int enemyOutThickness = 0;
+	int enemyMaxShapeVer = 0;
+	int enemyMinShapeVer = 0;
+	int smallEnemyLifeSpan = 0;
+	int spawnInterval = 0;
+
+	//Bullet Data
+	int bulletShapeRadius = 0;
+	int bulletCollisionRadius = 0;
+	float bulletSpeed = 0;
+	sf::Color bulletFillColor;
+	sf::Color bulletOutColor;
+	int bulletOutThickness = 0;
+	int bulletShapeVer = 0;
+	int bulletLifeSpan = 0;
+
+	ConfigData(const std::string filepath)
+	{
+		ReadFromFile(filepath);
+	}
+
+
 
 };

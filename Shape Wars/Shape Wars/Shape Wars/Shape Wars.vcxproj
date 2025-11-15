@@ -104,8 +104,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;$(ProjectDir)src\;$(ProjectDir)src\Systems\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,8 +122,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;$(ProjectDir)src\;$(ProjectDir)src\Systems\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Systems\MovementSystem.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\imgui\imgui-SFML.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Systems\MovementSystem.h" />
     <ClInclude Include="src\AudioData.hpp" />
     <ClInclude Include="src\ConfigData.hpp" />
     <ClInclude Include="src\Game.h" />

@@ -12,7 +12,7 @@ class EntityManager
 	EntityVec m_entitiesToAdd;
 	std::map<std::string, EntityVec> m_entityMap;
 	size_t m_totalEntities = 0;
-
+	
 	void RemoveDeadEntities(EntityVec& vec)
 	{
 		vec.erase(std::remove_if(vec.begin(),vec.end(),

@@ -6,31 +6,37 @@
 #include <SFML/Window.hpp>
 #include "ConfigData.hpp"
 #include "AudioData.hpp"
+#include "MovementSystem.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
-struct EnemyConfig  { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN,SMAX; };
+struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
 struct BulletConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
 
 
 class Game
 {
-	sf::RenderWindow m_window;
-	EntityManager m_entities;
-	sf::Font m_font;
+	sf::RenderWindow window;
+	sf::Font font;
+	sf::Clock clock;
 	/*sf::Text m_text;*/
-	PlayerConfig m_playerConfig;
-	EnemyConfig m_enemyConfig;
-	BulletConfig m_bulletConfig;
-	ConfigData m_configData;
-	AudioData m_audioData;
-	sf::Clock m_clock;
-	int m_score = 0;
-	int m_currentFrame = 0;
-	int m_lastEnemySpawnTime = 0;
-	bool m_paused = false;
-	bool m_running = true;
 
-	void init(const std::string& config);
+	PlayerConfig playerConfig;
+	EnemyConfig enemyConfig;
+	BulletConfig bulletConfig;
+	ConfigData configData;
+	AudioData audioData;
+
+	EntityManager entities;
+	MovementSystem movementSystem;
+
+	int score = 0;
+	int currentFrame = 0;
+	int lastEnemySpawnTime = 0;
+
+	bool isGamePaused = false;
+	bool isGameRunning = true;
+
+	void init();
 	void SetPaused(bool value);
 
 	void SMovement();
