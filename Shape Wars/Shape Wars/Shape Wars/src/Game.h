@@ -7,6 +7,7 @@
 #include "ConfigData.hpp"
 #include "AudioData.hpp"
 #include "MovementSystem.h"
+#include "InputSystem.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
@@ -28,6 +29,7 @@ class Game
 
 	EntityManager entities;
 	MovementSystem movementSystem;
+	InputSystem inputSystem;
 
 	int score = 0;
 	int currentFrame = 0;
@@ -50,8 +52,9 @@ class Game
 	void SpawnPlayer();
 	void SpawnEnemy();
 	void SpawnSmallEnemies(std::shared_ptr<Entity> entity);
-	void SpawnBullet(std::shared_ptr<Entity> entity, const Vec2f& mousePos);
-	void SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mousePos);
+
+	void SpawnBullet(const Vec2f& mousePos);
+	void CloseWindow();
 
 	std::shared_ptr<Entity> Player();
 

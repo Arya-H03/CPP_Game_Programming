@@ -16,7 +16,13 @@ void Game::init()
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
 	audioData.PlayMusic(10);
+
+	inputSystem.AddEventToWindowClose([this]() {CloseWindow(); });
+	inputSystem.AddEventToLeftClick([this](const Vec2f& mousePos) {SpawnBullet(mousePos); });
+
 	SpawnPlayer();
+
+	
 }
 
 std::shared_ptr<Entity> Game::Player()
@@ -28,7 +34,6 @@ std::shared_ptr<Entity> Game::Player()
 
 void Game::Run()
 {
-
 	while (isGameRunning)
 	{
 		entities.Update();
@@ -115,8 +120,9 @@ void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 
 }
 
-void Game::SpawnBullet(std::shared_ptr<Entity> player, const Vec2f& mousePos)
+void Game::SpawnBullet(const Vec2f& mousePos)
 {
+	auto player = Player();
 	auto bullet = entities.AddEntity("Bullet");
 	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
 	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0, configData.bulletSpeed);
@@ -126,9 +132,10 @@ void Game::SpawnBullet(std::shared_ptr<Entity> player, const Vec2f& mousePos)
 
 	audioData.PlayShootSFX(200);
 }
-void Game::SpawnSpecialAbility(std::shared_ptr<Entity> entity, const Vec2f& mousePos)
+void Game::CloseWindow()
 {
-
+	isGameRunning = false;
+	window.close();
 }
 
 void Game::SMovement()
@@ -174,84 +181,7 @@ void Game::SUserInput()
 {
 	if (!Player()) return;
 
-	auto& inputC = Player()->Get<CInput>();
-
-	while (const auto event = window.pollEvent())
-	{
-		ImGui::SFML::ProcessEvent(window, *event);
-
-		if (event->is<sf::Event::Closed>())
-		{
-			isGameRunning = false;
-			window.close();
-		}
-
-		else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-		{
-
-			switch (keyPressed->scancode)
-			{
-			case sf::Keyboard::Scancode::W:
-				inputC.up = true;
-				break;
-			case sf::Keyboard::Scancode::S:
-				inputC.down = true;
-				break;
-			case sf::Keyboard::Scancode::A:
-				inputC.left = true;
-				break;
-			case sf::Keyboard::Scancode::D:
-				inputC.right = true;
-				break;
-			default:
-				break;
-			}
-
-		}
-
-		else if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
-		{
-			switch (keyReleased->scancode)
-			{
-			case sf::Keyboard::Scancode::W:
-				inputC.up = false;
-				break;
-			case sf::Keyboard::Scancode::S:
-				inputC.down = false;
-				break;
-			case sf::Keyboard::Scancode::A:
-				inputC.left = false;
-				break;
-			case sf::Keyboard::Scancode::D:
-				inputC.right = false;
-				break;
-			default:
-				break;
-			}
-
-		}
-
-		else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
-		{
-			if (mousePressed->button == sf::Mouse::Button::Left)
-			{
-				inputC.shoot = true;
-				SpawnBullet(Player(), Vec2f(mousePressed->position.x, mousePressed->position.y));
-			}
-
-		}
-
-		else if (const auto* mouseReleased = event->getIf<sf::Event::MouseButtonReleased>())
-		{
-			if (mouseReleased->button == sf::Mouse::Button::Left)
-			{
-				inputC.shoot = false;
-			}
-
-		}
-	}
-
-
+	inputSystem.HandleInput(window, Player()->Get<CInput>());
 }
 
 void Game::SRender()
