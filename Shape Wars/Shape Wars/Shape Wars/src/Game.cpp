@@ -17,8 +17,8 @@ void Game::init()
 
 	audioData.PlayMusic(10);
 
-	inputSystem.AddEventToWindowClose([this]() {CloseWindow(); });
-	inputSystem.AddEventToLeftClick([this](const Vec2f& mousePos) {SpawnBullet(mousePos); });
+	inputSystem.onWindowClose.Subscribe<Game, &Game::CloseWindow>(this);
+	inputSystem.onLeftClick.Subscribe<Game, &Game::SpawnBullet>(this);
 
 	SpawnPlayer();
 
@@ -27,7 +27,7 @@ void Game::init()
 
 std::shared_ptr<Entity> Game::Player()
 {
-	auto& players = entities.GetEntities("Player");
+	auto& players = entityManager.GetEntities("Player");
 	if (players.size() <= 0) return nullptr;
 	return players.front();
 }
@@ -36,15 +36,20 @@ void Game::Run()
 {
 	while (isGameRunning)
 	{
-		entities.Update();
+		entityManager.Update();
 		ImGui::SFML::Update(window, clock.restart());
 
-		SEnemySpawner();
-		SMovement();
+		//Input
+		inputSystem.HandleInput(window, Player().get());
+
+		//Game Logic
+		movementSystem.HandleMovementSystem(entityManager);
+		lifeSpanSystem.HandleLifeSpanSystem(entityManager);
 		SCollision();
-		SUserInput();
-		SLifeSpan();
+		SEnemySpawner();
 		SGUI();
+
+		//Render
 		SRender();
 
 		currentFrame++;
@@ -58,7 +63,7 @@ void Game::SetPaused(bool value)
 
 void Game::SpawnPlayer()
 {
-	auto player = entities.AddEntity("Player");
+	auto player = entityManager.AddEntity("Player");
 	player->Add<CTransform>(Vec2f(configData.windowW / 2, configData.windowH / 2), Vec2f(0, 0), 0.0f, configData.playerSpeed);
 	player->Add<CShape>(configData.playerShapeRadius, configData.playerShapeVer, configData.playerFillColor, configData.playerOutColor, configData.playerOutThickness);
 	player->Add<CInput>();
@@ -90,7 +95,7 @@ void Game::SpawnEnemy()
 	//Random Speed
 	float rSpeed = configData.enemyMinSpeed + rand() % (configData.enemyMaxSpeed + 1);
 
-	auto entity = entities.AddEntity("Enemy");
+	auto entity = entityManager.AddEntity("Enemy");
 	entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0, rSpeed);
 	entity->Add<CShape>(configData.enemyShapeRadius, rVer, sf::Color(r, g, b), configData.enemyOutColor, 4.0f);
 	entity->Add<CCollision>(configData.enemyCollisionRadius);
@@ -108,22 +113,18 @@ void Game::SpawnSmallEnemies(std::shared_ptr<Entity> entity)
 		float angle = ((90 - (a / 2)) - (a * i)) * (3.14159265358979323846 / 180.0);
 		Vec2f vel(std::cos(angle) * shape.circle.getRadius(), std::sin(angle) * shape.circle.getRadius());
 
-		auto sEnemy = entities.AddEntity("SmallEnemy");
+		auto sEnemy = entityManager.AddEntity("SmallEnemy");
 		sEnemy->Add<CTransform>(transform.pos, vel, 0, transform.speed);
 		sEnemy->Add<CShape>(shape.circle.getRadius() / 2, shape.circle.getPointCount(), shape.circle.getFillColor(), shape.circle.getOutlineColor(), shape.circle.getOutlineThickness() / 2);
 		sEnemy->Add<CCollision>(entity->Get<CCollision>().radius / 2);
 		sEnemy->Add<CLifeSpan>(configData.smallEnemyLifeSpan);
 	}
-
-
-
-
 }
 
 void Game::SpawnBullet(const Vec2f& mousePos)
 {
 	auto player = Player();
-	auto bullet = entities.AddEntity("Bullet");
+	auto bullet = entityManager.AddEntity("Bullet");
 	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
 	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0, configData.bulletSpeed);
 	bullet->Add<CShape>(configData.bulletShapeRadius, configData.bulletShapeVer, configData.bulletFillColor, configData.bulletOutColor, configData.bulletOutThickness);
@@ -138,52 +139,6 @@ void Game::CloseWindow()
 	window.close();
 }
 
-void Game::SMovement()
-{
-	std::shared_ptr<Entity> player = Player();
-	if (player) movementSystem.UpdatePlayerMovement(*player);
-
-	for (auto& bullet : entities.GetEntities("Bullet"))
-	{
-		movementSystem.UpdateBulletMovement(*bullet);
-	}
-
-
-	for (auto& enemy : entities.GetEntities("Enemy"))
-	{
-		movementSystem.UpdateEnemyMovement(*enemy);
-	}
-
-
-	for (auto& smallEnemy : entities.GetEntities("SmallEnemy"))
-	{
-		movementSystem.UpdateSmallEnemyMovement(*smallEnemy);
-	}
-
-}
-
-void Game::SLifeSpan()
-{
-	for (auto& bullet : entities.GetEntities("Bullet"))
-	{
-		bullet->Get<CLifeSpan>().remaining--;
-		if (bullet->Get<CLifeSpan>().remaining <= 0) bullet->Destroy();
-	}
-
-	for (auto& sEnemy : entities.GetEntities("SmallEnemy"))
-	{
-		sEnemy->Get<CLifeSpan>().remaining--;
-		if (sEnemy->Get<CLifeSpan>().remaining <= 0) sEnemy->Destroy();
-	}
-}
-
-void Game::SUserInput()
-{
-	if (!Player()) return;
-
-	inputSystem.HandleInput(window, Player()->Get<CInput>());
-}
-
 void Game::SRender()
 {
 	window.clear();
@@ -196,7 +151,7 @@ void Game::SRender()
 		window.draw(Player()->Get<CShape>().circle);
 	}
 
-	for (auto& bullet : entities.GetEntities("Bullet"))
+	for (auto& bullet : entityManager.GetEntities("Bullet"))
 	{
 		auto& shape = bullet->Get<CShape>();
 		auto& lifeSpan = bullet->Get<CLifeSpan>();
@@ -217,7 +172,7 @@ void Game::SRender()
 		window.draw(shape.circle);
 	}
 
-	for (auto& enemy : entities.GetEntities("Enemy"))
+	for (auto& enemy : entityManager.GetEntities("Enemy"))
 	{
 		enemy->Get<CShape>().circle.setPosition(enemy->Get<CTransform>().pos);
 		enemy->Get<CTransform>().angle += 1.0f;
@@ -225,7 +180,7 @@ void Game::SRender()
 		window.draw(enemy->Get<CShape>().circle);
 	}
 
-	for (auto& sEnemy : entities.GetEntities("SmallEnemy"))
+	for (auto& sEnemy : entityManager.GetEntities("SmallEnemy"))
 	{
 		auto& lifeSpan = sEnemy->Get<CLifeSpan>();
 		auto& transform = sEnemy->Get<CTransform>();
@@ -279,7 +234,7 @@ void Game::SGUI()
 			int btnId = 0;
 			if (ImGui::CollapsingHeader("Entities by Tags"))
 			{
-				for (auto& [tag, entityVec] : entities.GetEntityMap())
+				for (auto& [tag, entityVec] : entityManager.GetEntityMap())
 				{
 					std::string headerName = tag;
 					if (ImGui::CollapsingHeader(headerName.c_str()))
@@ -313,7 +268,7 @@ void Game::SGUI()
 			if (ImGui::CollapsingHeader("All Entities"))
 			{
 				bool isDestroyed = false;
-				for (auto& e : entities.GetEntities())
+				for (auto& e : entityManager.GetEntities())
 				{
 					//Delete btn
 					static int clicked = 0;
@@ -359,11 +314,11 @@ void Game::SEnemySpawner()
 
 void Game::SCollision()
 {
-	for (auto& bullet : entities.GetEntities("Bullet"))
+	for (auto& bullet : entityManager.GetEntities("Bullet"))
 	{
 		auto& bTransform = bullet->Get<CTransform>();
 		auto& bCollision = bullet->Get<CCollision>();
-		for (auto& enemy : entities.GetEntities("Enemy"))
+		for (auto& enemy : entityManager.GetEntities("Enemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -378,7 +333,7 @@ void Game::SCollision()
 			}
 		}
 
-		for (auto& enemy : entities.GetEntities("SmallEnemy"))
+		for (auto& enemy : entityManager.GetEntities("SmallEnemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -399,7 +354,7 @@ void Game::SCollision()
 		auto& pTransform = Player()->Get<CTransform>();
 		auto& pCollision = Player()->Get<CCollision>();
 
-		for (auto& enemy : entities.GetEntities("Enemy"))
+		for (auto& enemy : entityManager.GetEntities("Enemy"))
 		{
 			auto& eTransform = enemy->Get<CTransform>();
 			auto& eCollision = enemy->Get<CCollision>();
@@ -414,7 +369,7 @@ void Game::SCollision()
 			}
 		}
 
-		for (auto& smallEnemy : entities.GetEntities("SmallEnemy"))
+		for (auto& smallEnemy : entityManager.GetEntities("SmallEnemy"))
 		{
 			auto& eTransform = smallEnemy->Get<CTransform>();
 			auto& eCollision = smallEnemy->Get<CCollision>();
@@ -434,7 +389,7 @@ void Game::SCollision()
 
 void Game::SResetGame()
 {
-	for (auto& entity : entities.GetEntities())
+	for (auto& entity : entityManager.GetEntities())
 	{
 		entity->Destroy();
 	}

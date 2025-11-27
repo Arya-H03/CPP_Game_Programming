@@ -8,6 +8,7 @@
 #include "AudioData.hpp"
 #include "MovementSystem.h"
 #include "InputSystem.h"
+#include "LifeSpan.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
@@ -27,9 +28,10 @@ class Game
 	ConfigData configData;
 	AudioData audioData;
 
-	EntityManager entities;
+	EntityManager entityManager;
 	MovementSystem movementSystem;
 	InputSystem inputSystem;
+	LifeSpan lifeSpanSystem;
 
 	int score = 0;
 	int currentFrame = 0;
@@ -40,10 +42,6 @@ class Game
 
 	void init();
 	void SetPaused(bool value);
-
-	void SMovement();
-	void SUserInput();
-	void SLifeSpan();
 	void SRender();
 	void SGUI();
 	void SEnemySpawner();

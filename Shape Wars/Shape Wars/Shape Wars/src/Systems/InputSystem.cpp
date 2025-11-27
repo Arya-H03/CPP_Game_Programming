@@ -1,7 +1,11 @@
 #include "InputSystem.h"
 
-void InputSystem::HandleInput(sf::RenderWindow& window, CInput& cInput)
+void InputSystem::HandleInput(sf::RenderWindow& window, Entity* player)
 {
+	if (!player) return;
+
+	CInput& cInput = player->Get<CInput>();
+
 	while (const std::optional<sf::Event> event = window.pollEvent())
 	{
 		ImGui::SFML::ProcessEvent(window, *event);
@@ -69,10 +73,8 @@ void InputSystem::HandleMouseBtnPressed(CInput& cInput, const std::optional<sf::
 		if (mousePressed->button == sf::Mouse::Button::Left)
 		{
 			cInput.shoot = true;
-			for (Func<Vec2f>& func : onLeftClick)
-			{
-				func(Vec2f(mousePressed->position.x, mousePressed->position.y));
-			}
+
+			onLeftClick.Invoke(Vec2f(mousePressed->position.x, mousePressed->position.y));
 		}
 
 	}
@@ -94,20 +96,8 @@ void InputSystem::HandleWindowClosing(CInput& cInput, const std::optional<sf::Ev
 {
 	if (event->is<sf::Event::Closed>())
 	{
-		for (Func<void>& func : onWindowClose)
-		{
-			func();
-		}
+		onWindowClose.Invoke();
 	}
 }
 
-void InputSystem::AddEventToLeftClick(const Func<Vec2f>& func)
-{
-	onLeftClick.push_back(func);
-}
-
-void InputSystem::AddEventToWindowClose(const Func<void>& func)
-{
-	onWindowClose.push_back(func);
-}
 

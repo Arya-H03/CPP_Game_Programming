@@ -2,7 +2,9 @@
 #include"Entity.hpp"
 #include "imgui.h"
 #include "imgui-sfml.h"
+#include "MyEvent.hpp"
 #include <functional>
+
 class InputSystem
 {
 private:
@@ -10,8 +12,7 @@ private:
 	template<typename T>
 	using Func = std::function<void(T)>;
 
-	std::vector<Func<Vec2f>> onLeftClick;
-	std::vector<Func<void>> onWindowClose;
+	
 
 	void HandleKeyPressed(CInput& cInput, const std::optional<sf::Event>& event);
 	void HandleKeyReleased(CInput& cInput, const std::optional<sf::Event>& event);
@@ -20,11 +21,12 @@ private:
 	void HandleWindowClosing(CInput& cInput, const std::optional<sf::Event>& event);
 public:
 
+	MyEvent<void(const Vec2f&)> onLeftClick;
+	MyEvent<void()> onWindowClose;
+
 	InputSystem() = default;
 
-	void HandleInput(sf::RenderWindow& window,CInput& cInput);
+	void HandleInput(sf::RenderWindow& window,Entity* player);
 
-	void AddEventToLeftClick(const Func<Vec2f>& func);
-	void AddEventToWindowClose(const Func<void>& func);
 };
 

@@ -5,6 +5,32 @@ MovementSystem::MovementSystem(const ConfigData& configData) :configData(configD
 {
 }
 
+void MovementSystem::HandleMovementSystem(EntityManager& entityManager)
+{
+	std::vector<std::shared_ptr<Entity>> players = entityManager.GetEntities("Player");
+	if (players.size() > 0)
+	{
+		UpdatePlayerMovement(*players.front());
+	}
+
+	for (auto& bullet : entityManager.GetEntities("Bullet"))
+	{
+		UpdateBulletMovement(*bullet);
+	}
+
+
+	for (auto& enemy : entityManager.GetEntities("Enemy"))
+	{
+		UpdateEnemyMovement(*enemy);
+	}
+
+
+	for (auto& smallEnemy : entityManager.GetEntities("SmallEnemy"))
+	{
+		UpdateSmallEnemyMovement(*smallEnemy);
+	}
+}
+
 void MovementSystem::UpdatePlayerMovement(Entity& player)
 {
 	CTransform& cTransform = player.Get<CTransform>();
