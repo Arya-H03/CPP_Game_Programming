@@ -7,6 +7,8 @@ class MovementSystem
 {
 private:
 	const ConfigData& configData;
+	size_t playerID;
+	EntityManager& entityManager;
 
 	void UpdatePlayerMovement(Entity& player);
 	void UpdateBulletMovement(Entity& bullet);
@@ -14,9 +16,9 @@ private:
 	void UpdateSmallEnemyMovement(Entity& smallEnemy);
 
 public:
-	MovementSystem(const ConfigData& configData);
+	MovementSystem(const ConfigData& configData,EntityManager& entityManager, size_t playerID): configData(configData), entityManager(entityManager), playerID(playerID){}
 
-	void HandleMovementSystem(EntityManager& entityManager);
-
+	void HandleMovementSystem();
+	void ResetPlayer(Entity* newPlayer);
 };
 

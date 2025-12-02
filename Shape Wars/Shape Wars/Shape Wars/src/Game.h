@@ -1,14 +1,16 @@
 #pragma once
 #include<SFML/Graphics.hpp>
-#include"EntityManager.hpp"
-#include "imgui.h"
-#include "imgui-sfml.h"
+#include <cassert>
 #include <SFML/Window.hpp>
+#include"EntityManager.hpp"
 #include "ConfigData.hpp"
 #include "AudioData.hpp"
 #include "MovementSystem.h"
 #include "InputSystem.h"
 #include "LifeSpan.h"
+#include "CollisionSystem.h"
+#include "GUISystem.h"
+#include "RenderSystem.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
@@ -28,10 +30,15 @@ class Game
 	ConfigData configData;
 	AudioData audioData;
 
-	EntityManager entityManager;
-	MovementSystem movementSystem;
-	InputSystem inputSystem;
-	LifeSpan lifeSpanSystem;
+	EntityManager entityManager; // declare first
+	
+	std::unique_ptr<CollisionSystem> collisionSystem;
+	std::unique_ptr<MovementSystem> movementSystem;
+	std::unique_ptr<GUISystem> guiSystem;
+	std::unique_ptr<LifeSpanSystem> lifeSpanSystem;
+	std::unique_ptr<InputSystem> inputSystem;
+	std::unique_ptr<RenderSystem> renderSystem;
+
 
 	int score = 0;
 	int currentFrame = 0;
@@ -41,20 +48,21 @@ class Game
 	bool isGameRunning = true;
 
 	void init();
-	void SetPaused(bool value);
-	void SRender();
-	void SGUI();
+	void SetPaused(bool value);;
 	void SEnemySpawner();
-	void SCollision();
 	void SResetGame();
-	void SpawnPlayer();
+	Entity* SpawnPlayer();
 	void SpawnEnemy();
-	void SpawnSmallEnemies(std::shared_ptr<Entity> entity);
-
+	void SpawnSmallEnemies(Entity& entity);
 	void SpawnBullet(const Vec2f& mousePos);
+
+	void ActionsOnPlayerHitEnemy(Entity& enemy);
+	void ActionsOnBulletHitEnemy(Entity& bullet, Entity& enemy);
+	void ActionsOnBulletHitSmallEnemy(Entity& bullet, Entity& enemy);
+
 	void CloseWindow();
 
-	std::shared_ptr<Entity> Player();
+	Entity* Player();
 
 public:
 

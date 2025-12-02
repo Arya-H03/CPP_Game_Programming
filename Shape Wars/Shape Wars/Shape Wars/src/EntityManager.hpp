@@ -11,23 +11,33 @@ class EntityManager
 	EntityVec m_entities;
 	EntityVec m_entitiesToAdd;
 	std::map<std::string, EntityVec> m_entityMap;
+	std::unordered_map<size_t, Entity*> m_entityById;
+
 	size_t m_totalEntities = 0;
-	
+
 	void RemoveDeadEntities(EntityVec& vec)
 	{
-		vec.erase(std::remove_if(vec.begin(),vec.end(),
-			[](const auto& e) { return !e->IsActive(); }), vec.end());
+		vec.erase(std::remove_if(vec.begin(), vec.end(),
+			[&](const auto& e)
+			{ if (!e->IsActive())
+		{
+			m_entityById.erase(e->Id());
+			return true;
+		}
+		return false; }),
+			vec.end());
 	}
 
 public:
 
 	EntityManager() = default;
-	
+
 	void Update()
 	{
 		for (auto& e : m_entitiesToAdd)
 		{
 			m_entities.push_back(e);
+			m_entityById[e->Id()] = e.get();
 		}
 		m_entitiesToAdd.clear();
 
@@ -72,5 +82,11 @@ public:
 	const std::map<std::string, EntityVec>& GetEntityMap()
 	{
 		return m_entityMap;
+	}
+
+	Entity* FindEntityByID(const size_t id)
+	{
+		auto it = m_entityById.find(id);
+		return (it != m_entityById.end()) ? it->second : nullptr;
 	}
 };

@@ -2,15 +2,19 @@
 
 #include "EntityManager.hpp"
 
-class LifeSpan
+class LifeSpanSystem
 {
 private:
+
+	EntityManager& entityManager;
 
 	void UpdateSmallEnemyLifeSpan(const EntityVec& smallEnemies);
 	void UpdateBulletsLifeSpan(const EntityVec& bullets);
 
 public:
 
-	void HandleLifeSpanSystem(EntityManager& entityManager);
+	LifeSpanSystem(EntityManager& entityManager):entityManager(entityManager) {}
+
+	void HandleLifeSpanSystem();
 };
 

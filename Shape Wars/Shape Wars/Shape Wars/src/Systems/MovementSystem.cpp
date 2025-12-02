@@ -1,18 +1,11 @@
 #include "MovementSystem.h"
 #include "Vec2.hpp"
 
-MovementSystem::MovementSystem(const ConfigData& configData) :configData(configData)
+void MovementSystem::HandleMovementSystem()
 {
-}
-
-void MovementSystem::HandleMovementSystem(EntityManager& entityManager)
-{
-	std::vector<std::shared_ptr<Entity>> players = entityManager.GetEntities("Player");
-	if (players.size() > 0)
-	{
-		UpdatePlayerMovement(*players.front());
-	}
-
+	Entity* player = entityManager.FindEntityByID(playerID);
+	if (player) UpdatePlayerMovement(*player);
+	
 	for (auto& bullet : entityManager.GetEntities("Bullet"))
 	{
 		UpdateBulletMovement(*bullet);
@@ -93,4 +86,9 @@ void MovementSystem::UpdateSmallEnemyMovement(Entity& smallEnemy)
 	{
 		cTransform.velocity.x *= -1;
 	}
+}
+
+void MovementSystem::ResetPlayer(Entity* player)
+{
+	playerID = player->Id();
 }

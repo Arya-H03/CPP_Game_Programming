@@ -1,6 +1,6 @@
 #include "LifeSpan.h"
 
-void LifeSpan::UpdateSmallEnemyLifeSpan(const EntityVec& smallEnemies)
+void LifeSpanSystem::UpdateSmallEnemyLifeSpan(const EntityVec& smallEnemies)
 {
 	for (auto& smallEnemy : smallEnemies)
 	{
@@ -9,7 +9,7 @@ void LifeSpan::UpdateSmallEnemyLifeSpan(const EntityVec& smallEnemies)
 	}
 }
 
-void LifeSpan::UpdateBulletsLifeSpan(const EntityVec& bullets)
+void LifeSpanSystem::UpdateBulletsLifeSpan(const EntityVec& bullets)
 {
 	for (auto& bullet : bullets)
 	{
@@ -18,7 +18,7 @@ void LifeSpan::UpdateBulletsLifeSpan(const EntityVec& bullets)
 	}
 }
 
-void LifeSpan::HandleLifeSpanSystem(EntityManager& entityManager)
+void LifeSpanSystem::HandleLifeSpanSystem()
 {
 	UpdateSmallEnemyLifeSpan(entityManager.GetEntities("SmallEnemy"));
 	UpdateBulletsLifeSpan(entityManager.GetEntities("SmallEnemy"));

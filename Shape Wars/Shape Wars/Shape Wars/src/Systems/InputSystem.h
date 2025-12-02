@@ -1,5 +1,5 @@
 #pragma once
-#include"Entity.hpp"
+#include"EntityManager.hpp"
 #include "imgui.h"
 #include "imgui-sfml.h"
 #include "MyEvent.hpp"
@@ -9,10 +9,9 @@ class InputSystem
 {
 private:
 
-	template<typename T>
-	using Func = std::function<void(T)>;
-
-	
+	sf::RenderWindow& window;
+	EntityManager& entityManager;
+	size_t playerID;
 
 	void HandleKeyPressed(CInput& cInput, const std::optional<sf::Event>& event);
 	void HandleKeyReleased(CInput& cInput, const std::optional<sf::Event>& event);
@@ -24,9 +23,10 @@ public:
 	MyEvent<void(const Vec2f&)> onLeftClick;
 	MyEvent<void()> onWindowClose;
 
-	InputSystem() = default;
+	InputSystem(sf::RenderWindow& window, EntityManager& entityManager, size_t playerID): window(window), playerID(playerID),entityManager(entityManager){}
 
-	void HandleInput(sf::RenderWindow& window,Entity* player);
+	void HandleInput();
+	void ResetPlayer(Entity* player);
 
 };
 

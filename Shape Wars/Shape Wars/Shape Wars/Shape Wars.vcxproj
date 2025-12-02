@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Systems\RenderSystem.cpp" />
+    <ClCompile Include="src\Systems\GUISystem.cpp" />
     <ClCompile Include="src\Systems\CollisionSystem.cpp" />
     <ClCompile Include="src\Systems\LifeSpan.cpp" />
     <ClCompile Include="src\Systems\InputSystem.cpp" />
@@ -149,6 +151,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Systems\RenderSystem.h" />
+    <ClInclude Include="src\Systems\GUISystem.h" />
     <ClInclude Include="src\Utils\MyEvent.hpp" />
     <ClInclude Include="src\Systems\CollisionSystem.h" />
     <ClInclude Include="src\Systems\LifeSpan.h" />

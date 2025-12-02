@@ -1,7 +1,8 @@
 #include "InputSystem.h"
 
-void InputSystem::HandleInput(sf::RenderWindow& window, Entity* player)
+void InputSystem::HandleInput()
 {
+	Entity* player = entityManager.FindEntityByID(playerID);
 	if (!player) return;
 
 	CInput& cInput = player->Get<CInput>();
@@ -99,5 +100,12 @@ void InputSystem::HandleWindowClosing(CInput& cInput, const std::optional<sf::Ev
 		onWindowClose.Invoke();
 	}
 }
+
+
+void InputSystem::ResetPlayer(Entity* player)
+{
+	playerID = player->Id();
+}
+
 
 
