@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;$(ProjectDir)src\;$(ProjectDir)src\Systems\;$(ProjectDir)src\Utils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;$(ProjectDir)src\;$(ProjectDir)src\Systems\;$(ProjectDir)src\GridSystem\;$(ProjectDir)src\Utils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,7 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;$(ProjectDir)src\;$(ProjectDir)src\Systems\;$(ProjectDir)src\Utils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\libraries\SFML-3.0.0\include;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui;$(ProjectDir)src\;$(ProjectDir)src\Systems\;$(ProjectDir)src\GridSystem\;$(ProjectDir)src\Utils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\GridSystem\Cell.cpp" />
+    <ClCompile Include="src\GridSystem\Grid.cpp" />
     <ClCompile Include="src\Systems\RenderSystem.cpp" />
     <ClCompile Include="src\Systems\GUISystem.cpp" />
     <ClCompile Include="src\Systems\CollisionSystem.cpp" />
@@ -151,6 +153,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\GridSystem\Cell.h" />
+    <ClInclude Include="src\GridSystem\Grid.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\GUISystem.h" />
     <ClInclude Include="src\Utils\MyEvent.hpp" />

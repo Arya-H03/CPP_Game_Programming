@@ -16,6 +16,7 @@ private:
 	void RenderSmallEnemies();
 	void RenderEnemeis();
 	void RenderGUI();
+	void RenderCells();
 
 public:
 	

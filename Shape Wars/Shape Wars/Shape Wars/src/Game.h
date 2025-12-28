@@ -11,6 +11,7 @@
 #include "CollisionSystem.h"
 #include "GUISystem.h"
 #include "RenderSystem.h"
+#include "Grid.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
@@ -38,7 +39,7 @@ class Game
 	std::unique_ptr<LifeSpanSystem> lifeSpanSystem;
 	std::unique_ptr<InputSystem> inputSystem;
 	std::unique_ptr<RenderSystem> renderSystem;
-
+	std::unique_ptr<Grid> grid;
 
 	int score = 0;
 	int currentFrame = 0;

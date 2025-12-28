@@ -23,6 +23,7 @@ void Game::init()
 	lifeSpanSystem = std::make_unique<LifeSpanSystem>(entityManager);
 	inputSystem = std::make_unique<InputSystem>(window, entityManager, Player()->Id());
 	renderSystem = std::make_unique<RenderSystem>(entityManager, Player()->Id(), window);
+	grid = std::make_unique<Grid>(1080, 1920, 60, entityManager);
 
 	collisionSystem->onPlayerCollisionWithEnemies.Subscribe<Game, &Game::ActionsOnPlayerHitEnemy>(this);
 	collisionSystem->onBulletCollisionWithEnemies.Subscribe<Game, &Game::ActionsOnBulletHitEnemy>(this);

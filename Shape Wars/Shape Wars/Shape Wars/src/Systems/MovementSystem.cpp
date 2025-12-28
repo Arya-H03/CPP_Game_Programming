@@ -1,5 +1,4 @@
 #include "MovementSystem.h"
-#include "Vec2.hpp"
 
 void MovementSystem::HandleMovementSystem()
 {

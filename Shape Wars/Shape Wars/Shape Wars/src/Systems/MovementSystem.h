@@ -1,6 +1,7 @@
 #pragma once
 #include "ConfigData.hpp"
 #include "EntityManager.hpp"
+#include "Vec2.hpp"
 
 
 class MovementSystem

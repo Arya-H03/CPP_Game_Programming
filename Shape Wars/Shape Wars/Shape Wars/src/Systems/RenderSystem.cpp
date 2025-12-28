@@ -10,9 +10,6 @@ void RenderSystem::RenderPlayer()
 	player->Get<CTransform>().angle += 1.0f;
 	player->Get<CShape>().circle.setRotation(sf::degrees(player->Get<CTransform>().angle));
 
-	//assert(player == nullptr);
-	std::cout << player->Get<CShape>().circle.getRadius();
-
 	window.draw(player->Get<CShape>().circle);
 }
 
@@ -83,6 +80,14 @@ void RenderSystem::RenderGUI()
 	ImGui::SFML::Render(window);
 }
 
+void RenderSystem::RenderCells()
+{
+	for (auto& cell : entityManager.GetEntities("Cell"))
+	{
+		window.draw(cell->Get<CShape>().circle);
+	}
+}
+
 void RenderSystem::HandleRenderSystem()
 {
 	window.clear();
@@ -91,6 +96,7 @@ void RenderSystem::HandleRenderSystem()
 	RenderBullets();
 	RenderSmallEnemies();
 	RenderEnemeis();
+	RenderCells();
 	RenderGUI();
 
 	window.display();
