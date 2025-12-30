@@ -13,7 +13,7 @@ void GUISystem::HandleGUI()
 			int clicked = 0;
 			if (ImGui::Button("Replay")) clicked++;
 			
-			Entity* player = entityManager.FindEntityByID(playerID);
+			Entity* player = m_entityManager.FindEntityByID(playerID);
 
 			if (clicked & 1 && player)
 			{
@@ -33,7 +33,7 @@ void GUISystem::HandleGUI()
 			int btnId = 0;
 			if (ImGui::CollapsingHeader("Entities by Tags"))
 			{
-				for (auto& [tag, entityVec] : entityManager.GetEntityMap())
+				for (auto& [tag, entityVec] : m_entityManager.GetEntityMap())
 				{
 					std::string headerName = tag;
 					if (ImGui::CollapsingHeader(headerName.c_str()))
@@ -67,7 +67,7 @@ void GUISystem::HandleGUI()
 			if (ImGui::CollapsingHeader("All Entities"))
 			{
 				bool isDestroyed = false;
-				for (auto& e : entityManager.GetEntities())
+				for (auto& e : m_entityManager.GetEntities())
 				{
 					//Delete btn
 					static int clicked = 0;
@@ -93,6 +93,19 @@ void GUISystem::HandleGUI()
 
 					if (isDestroyed) e->Destroy();
 				}
+			}
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Debug"))
+		{
+			int clicked = 0;
+			if (ImGui::Button("Visualize Cells")) clicked++;
+
+			if (clicked& 1)
+			{
+				if (m_gridSystem.GetRenderCells())m_gridSystem.SetRenderCells(false);
+				else m_gridSystem.SetRenderCells(true);
+				clicked = 0;
 			}
 			ImGui::EndTabItem();
 		}

@@ -2,7 +2,7 @@
 
 void RenderSystem::RenderPlayer()
 {
-	Entity* player = entityManager.FindEntityByID(playerID);
+	Entity* player = m_entityManager.FindEntityByID(playerID);
 
 	if (player == nullptr) return;
 
@@ -15,7 +15,7 @@ void RenderSystem::RenderPlayer()
 
 void RenderSystem::RenderBullets()
 {
-	for (auto& bullet : entityManager.GetEntities("Bullet"))
+	for (auto& bullet : m_entityManager.GetEntities("Bullet"))
 	{
 		auto& shape = bullet->Get<CShape>();
 		auto& lifeSpan = bullet->Get<CLifeSpan>();
@@ -39,7 +39,7 @@ void RenderSystem::RenderBullets()
 
 void RenderSystem::RenderSmallEnemies()
 {
-	for (auto& sEnemy : entityManager.GetEntities("SmallEnemy"))
+	for (auto& sEnemy : m_entityManager.GetEntities("SmallEnemy"))
 	{
 		auto& lifeSpan = sEnemy->Get<CLifeSpan>();
 		auto& transform = sEnemy->Get<CTransform>();
@@ -66,7 +66,7 @@ void RenderSystem::RenderSmallEnemies()
 
 void RenderSystem::RenderEnemeis()
 {
-	for (auto& enemy : entityManager.GetEntities("Enemy"))
+	for (auto& enemy : m_entityManager.GetEntities("Enemy"))
 	{
 		enemy->Get<CShape>().circle.setPosition(enemy->Get<CTransform>().pos);
 		enemy->Get<CTransform>().angle += 1.0f;
@@ -82,10 +82,17 @@ void RenderSystem::RenderGUI()
 
 void RenderSystem::RenderCells()
 {
-	for (auto& cell : entityManager.GetEntities("Cell"))
+	if (!m_gridSystem.GetRenderCells()) return;
+
+	for (auto& cell : m_entityManager.GetEntities("Cell"))
 	{
 		window.draw(cell->Get<CShape>().circle);
+		window.draw(*cell->Get<CText>().cText);
 	}
+}
+
+RenderSystem::RenderSystem(EntityManager& entityManager, size_t playerID, sf::RenderWindow& window, GridSystem& gridSystem) :m_entityManager(entityManager), playerID(playerID), window(window),m_gridSystem(gridSystem)
+{
 }
 
 void RenderSystem::HandleRenderSystem()

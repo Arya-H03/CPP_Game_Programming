@@ -11,7 +11,8 @@
 #include "CollisionSystem.h"
 #include "GUISystem.h"
 #include "RenderSystem.h"
-#include "Grid.h"
+#include "GridSystem.h"
+#include "AssetManager.h"
 
 struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
@@ -23,7 +24,7 @@ class Game
 	sf::RenderWindow window;
 	sf::Font font;
 	sf::Clock clock;
-	/*sf::Text m_text;*/
+	
 
 	PlayerConfig playerConfig;
 	EnemyConfig enemyConfig;
@@ -38,8 +39,8 @@ class Game
 	std::unique_ptr<GUISystem> guiSystem;
 	std::unique_ptr<LifeSpanSystem> lifeSpanSystem;
 	std::unique_ptr<InputSystem> inputSystem;
+	std::unique_ptr<GridSystem> gridSystem;
 	std::unique_ptr<RenderSystem> renderSystem;
-	std::unique_ptr<Grid> grid;
 
 	int score = 0;
 	int currentFrame = 0;

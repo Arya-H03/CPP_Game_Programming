@@ -135,8 +135,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AssetManager.cpp" />
     <ClCompile Include="src\GridSystem\Cell.cpp" />
-    <ClCompile Include="src\GridSystem\Grid.cpp" />
+    <ClCompile Include="src\GridSystem\GridSystem.cpp" />
     <ClCompile Include="src\Systems\RenderSystem.cpp" />
     <ClCompile Include="src\Systems\GUISystem.cpp" />
     <ClCompile Include="src\Systems\CollisionSystem.cpp" />
@@ -153,8 +154,9 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AssetManager.h" />
     <ClInclude Include="src\GridSystem\Cell.h" />
-    <ClInclude Include="src\GridSystem\Grid.h" />
+    <ClInclude Include="src\GridSystem\GridSystem.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\GUISystem.h" />
     <ClInclude Include="src\Utils\MyEvent.hpp" />

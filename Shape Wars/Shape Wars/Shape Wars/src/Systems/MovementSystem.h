@@ -17,7 +17,8 @@ private:
 	void UpdateSmallEnemyMovement(Entity& smallEnemy);
 
 public:
-	MovementSystem(const ConfigData& configData,EntityManager& entityManager, size_t playerID): configData(configData), entityManager(entityManager), playerID(playerID){}
+	MovementSystem(const ConfigData& configData,EntityManager& entityManager, size_t playerID): configData(configData), entityManager(entityManager), playerID(playerID)
+	{}
 
 	void HandleMovementSystem();
 	void ResetPlayer(Entity* newPlayer);

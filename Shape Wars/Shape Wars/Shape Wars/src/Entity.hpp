@@ -13,8 +13,9 @@ using ComponentTuple = std::tuple<
 	CCollision,
 	CScore,
 	CLifeSpan,
-	CInput
-
+	CInput,
+	CCoord,
+	CText
 >;
 
 class Entity

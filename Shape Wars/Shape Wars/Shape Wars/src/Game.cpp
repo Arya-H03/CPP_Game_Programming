@@ -15,15 +15,17 @@ void Game::init()
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
+	AssetManager::Instance().Initialize("./src/media/font.otf");
+
 	SpawnPlayer();
 
 	collisionSystem = std::make_unique<CollisionSystem>(entityManager, Player()->Id());
 	movementSystem = std::make_unique<MovementSystem>(configData, entityManager, Player()->Id());
-	guiSystem = std::make_unique<GUISystem>(entityManager, Player()->Id(),score);
 	lifeSpanSystem = std::make_unique<LifeSpanSystem>(entityManager);
 	inputSystem = std::make_unique<InputSystem>(window, entityManager, Player()->Id());
-	renderSystem = std::make_unique<RenderSystem>(entityManager, Player()->Id(), window);
-	grid = std::make_unique<Grid>(1080, 1920, 60, entityManager);
+	gridSystem = std::make_unique<GridSystem>(1080, 1920, 60, entityManager);
+	guiSystem = std::make_unique<GUISystem>(entityManager, Player()->Id(),score, *gridSystem);
+	renderSystem = std::make_unique<RenderSystem>(entityManager, Player()->Id(), window,*gridSystem);
 
 	collisionSystem->onPlayerCollisionWithEnemies.Subscribe<Game, &Game::ActionsOnPlayerHitEnemy>(this);
 	collisionSystem->onBulletCollisionWithEnemies.Subscribe<Game, &Game::ActionsOnBulletHitEnemy>(this);
