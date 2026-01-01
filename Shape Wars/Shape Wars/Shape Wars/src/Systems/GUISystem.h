@@ -1,7 +1,7 @@
 #pragma once
 #include "imgui.h"
 #include "imgui-sfml.h"
-#include "EntityManager.hpp"
+#include "EntityManager.h"
 #include "MyEvent.hpp"
 #include "GridSystem.h"
 
@@ -19,7 +19,7 @@ public:
 
 	MyEvent<void()> onResetGameBtnClick;
 
-	GUISystem(EntityManager& entityManager, size_t playerID, int& score, GridSystem& gridSystem):m_entityManager(entityManager), playerID(playerID),score(score),m_gridSystem(gridSystem){}
+	GUISystem(EntityManager& entityManager ,int& score, GridSystem& gridSystem):m_entityManager(entityManager),score(score),m_gridSystem(gridSystem){}
 
 	void HandleGUI();
 	void ResetPlayer(Entity* player);

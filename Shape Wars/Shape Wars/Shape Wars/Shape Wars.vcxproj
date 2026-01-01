@@ -135,6 +135,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\EntityManager.cpp" />
+    <ClCompile Include="src\EntityMemoryPool.cpp" />
     <ClCompile Include="src\AssetManager.cpp" />
     <ClCompile Include="src\GridSystem\Cell.cpp" />
     <ClCompile Include="src\GridSystem\GridSystem.cpp" />
@@ -152,8 +155,12 @@
     <ClCompile Include="src\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Systems\UnitSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\EntityManager.h" />
+    <ClInclude Include="src\Entity.h" />
+    <ClInclude Include="src\EntityMemoryPool.h" />
     <ClInclude Include="src\AssetManager.h" />
     <ClInclude Include="src\GridSystem\Cell.h" />
     <ClInclude Include="src\GridSystem\GridSystem.h" />
@@ -168,8 +175,6 @@
     <ClInclude Include="src\ConfigData.hpp" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Components.hpp" />
-    <ClInclude Include="src\Entity.hpp" />
-    <ClInclude Include="src\EntityManager.hpp" />
     <ClInclude Include="src\imgui\imconfig-SFML.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui-SFML.h" />
@@ -180,6 +185,7 @@
     <ClInclude Include="src\imgui\imstb_textedit.h" />
     <ClInclude Include="src\imgui\imstb_truetype.h" />
     <ClInclude Include="src\Vec2.hpp" />
+    <ClInclude Include="src\Systems\UnitSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\config.txt" />

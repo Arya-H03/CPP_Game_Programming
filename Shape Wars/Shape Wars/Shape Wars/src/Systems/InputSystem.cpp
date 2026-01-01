@@ -2,20 +2,22 @@
 
 void InputSystem::HandleInput()
 {
-	Entity* player = entityManager.FindEntityByID(playerID);
-	if (!player) return;
-
-	CInput& cInput = player->Get<CInput>();
-
 	while (const std::optional<sf::Event> event = window.pollEvent())
 	{
 		ImGui::SFML::ProcessEvent(window, *event);
 
-		HandleWindowClosing(cInput, event);
-		HandleKeyPressed(cInput, event);
-		HandleKeyReleased(cInput, event);
-		HandleMouseBtnPressed(cInput, event);
-		HandleMouseBtnReleased(cInput, event);
+		for (Entity entity : entityManager.GetEntities("Player"))
+		{
+			if (!entity.HasComponent<CInput>()) continue;
+
+			CInput& input = entity.GetComponent<CInput>();
+			HandleWindowClosing(input, event);
+			HandleKeyPressed(input, event);
+			HandleKeyReleased(input, event);
+			HandleMouseBtnPressed(input, event);
+			HandleMouseBtnReleased(input, event);
+
+		}
 	}
 }
 
@@ -101,11 +103,6 @@ void InputSystem::HandleWindowClosing(CInput& cInput, const std::optional<sf::Ev
 	}
 }
 
-
-void InputSystem::ResetPlayer(Entity* player)
-{
-	playerID = player->Id();
-}
 
 
 

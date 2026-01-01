@@ -1,5 +1,5 @@
 #pragma once
-#include "EntityManager.hpp"
+#include "EntityManager.h"
 #include "MyEvent.hpp"
 
 class CollisionSystem
@@ -7,13 +7,12 @@ class CollisionSystem
 private:
 
 	EntityManager& entityManager;
-	size_t playerID;
 
 	void HandleBulletCollision();
 	void HandlePlayerCollision();
 
 public:
-	CollisionSystem(EntityManager& entityManager, size_t playerID) :entityManager(entityManager), playerID(playerID) {}
+	CollisionSystem(EntityManager& entityManager) :entityManager(entityManager) {}
 
 	MyEvent<void(Entity& bullet, Entity& enemy)> onBulletCollisionWithEnemies;
 	MyEvent<void(Entity& bullet, Entity& enemy)> onBulletCollisionWithSmallEnemy;

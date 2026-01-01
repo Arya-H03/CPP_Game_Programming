@@ -1,5 +1,5 @@
 #pragma once
-#include"EntityManager.hpp"
+#include"EntityManager.h"
 #include"AssetManager.h"
 
 class GridSystem
@@ -14,7 +14,7 @@ private:
 	float m_cellRadius;
 	bool m_renderCells = false;
 
-	std::vector<std::vector<std::shared_ptr<Entity>>> cells;
+	std::vector<std::vector<Entity*>> cells;
 
 	EntityManager& m_entityManager;
 	

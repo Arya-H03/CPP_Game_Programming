@@ -1,3 +1,6 @@
+E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\Entity.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\Entity.obj
+E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\EntityManager.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\EntityManager.obj
+E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\EntityMemoryPool.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\EntityMemoryPool.obj
 E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\AssetManager.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\AssetManager.obj
 E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\GridSystem\Cell.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\Cell.obj
 E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\GridSystem\GridSystem.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\GridSystem.obj
@@ -15,3 +18,4 @@ E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui\
 E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui\imgui_tables.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\imgui_tables.obj
 E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\imgui\imgui_widgets.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\imgui_widgets.obj
 E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\main.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\main.obj
+E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\src\Systems\UnitSystem.cpp;E:\Repositories\CPP_Game_Programming\Shape Wars\Shape Wars\Shape Wars\x64\Debug\UnitSystem.obj

@@ -2,20 +2,20 @@
 
 void RenderSystem::RenderPlayer()
 {
-	Entity* player = m_entityManager.FindEntityByID(playerID);
+	for (Entity entity : m_entityManager.GetEntities())
+	{
+		if (!entity.HasComponent<CShape>()) continue;
 
-	if (player == nullptr) return;
+		CShape& shape = entity.GetComponent<CShape>();
 
-	player->Get<CShape>().circle.setPosition(player->Get<CTransform>().pos);
-	player->Get<CTransform>().angle += 1.0f;
-	player->Get<CShape>().circle.setRotation(sf::degrees(player->Get<CTransform>().angle));
-
-	window.draw(player->Get<CShape>().circle);
+		window.draw(shape.circle);
+	}
+		
 }
 
 void RenderSystem::RenderBullets()
 {
-	for (auto& bullet : m_entityManager.GetEntities("Bullet"))
+	/*for (auto& bullet : m_entityManager.GetEntities("Bullet"))
 	{
 		auto& shape = bullet->Get<CShape>();
 		auto& lifeSpan = bullet->Get<CLifeSpan>();
@@ -34,12 +34,12 @@ void RenderSystem::RenderBullets()
 
 		shape.circle.setPosition(transform.pos);
 		window.draw(shape.circle);
-	}
+	}*/
 }
 
 void RenderSystem::RenderSmallEnemies()
 {
-	for (auto& sEnemy : m_entityManager.GetEntities("SmallEnemy"))
+	/*for (auto& sEnemy : m_entityManager.GetEntities("SmallEnemy"))
 	{
 		auto& lifeSpan = sEnemy->Get<CLifeSpan>();
 		auto& transform = sEnemy->Get<CTransform>();
@@ -61,18 +61,18 @@ void RenderSystem::RenderSmallEnemies()
 		shape.circle.setPosition(transform.pos);
 
 		window.draw(sEnemy->Get<CShape>().circle);
-	}
+	}*/
 }
 
 void RenderSystem::RenderEnemeis()
 {
-	for (auto& enemy : m_entityManager.GetEntities("Enemy"))
+	/*for (auto& enemy : m_entityManager.GetEntities("Enemy"))
 	{
 		enemy->Get<CShape>().circle.setPosition(enemy->Get<CTransform>().pos);
 		enemy->Get<CTransform>().angle += 1.0f;
 		enemy->Get<CShape>().circle.setRotation(sf::degrees(enemy->Get<CTransform>().angle));
 		window.draw(enemy->Get<CShape>().circle);
-	}
+	}*/
 }
 
 void RenderSystem::RenderGUI()
@@ -82,16 +82,16 @@ void RenderSystem::RenderGUI()
 
 void RenderSystem::RenderCells()
 {
-	if (!m_gridSystem.GetRenderCells()) return;
+	/*if (!m_gridSystem.GetRenderCells()) return;
 
 	for (auto& cell : m_entityManager.GetEntities("Cell"))
 	{
 		window.draw(cell->Get<CShape>().circle);
 		window.draw(*cell->Get<CText>().cText);
-	}
+	}*/
 }
 
-RenderSystem::RenderSystem(EntityManager& entityManager, size_t playerID, sf::RenderWindow& window, GridSystem& gridSystem) :m_entityManager(entityManager), playerID(playerID), window(window),m_gridSystem(gridSystem)
+RenderSystem::RenderSystem(EntityManager& entityManager, sf::RenderWindow& window, GridSystem& gridSystem) :m_entityManager(entityManager), window(window),m_gridSystem(gridSystem)
 {
 }
 
@@ -107,11 +107,6 @@ void RenderSystem::HandleRenderSystem()
 	RenderGUI();
 
 	window.display();
-}
-
-void RenderSystem::ResetPlayer(Entity* player)
-{
-	playerID = player->Id();
 }
 
 

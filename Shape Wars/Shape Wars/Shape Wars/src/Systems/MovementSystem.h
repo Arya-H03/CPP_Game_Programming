@@ -1,6 +1,6 @@
 #pragma once
 #include "ConfigData.hpp"
-#include "EntityManager.hpp"
+#include "EntityManager.h"
 #include "Vec2.hpp"
 
 
@@ -8,7 +8,6 @@ class MovementSystem
 {
 private:
 	const ConfigData& configData;
-	size_t playerID;
 	EntityManager& entityManager;
 
 	void UpdatePlayerMovement(Entity& player);
@@ -17,10 +16,9 @@ private:
 	void UpdateSmallEnemyMovement(Entity& smallEnemy);
 
 public:
-	MovementSystem(const ConfigData& configData,EntityManager& entityManager, size_t playerID): configData(configData), entityManager(entityManager), playerID(playerID)
+	MovementSystem(const ConfigData& configData,EntityManager& entityManager): configData(configData), entityManager(entityManager)
 	{}
 
 	void HandleMovementSystem();
-	void ResetPlayer(Entity* newPlayer);
 };
 

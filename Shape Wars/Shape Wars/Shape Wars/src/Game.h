@@ -2,7 +2,7 @@
 #include<SFML/Graphics.hpp>
 #include <cassert>
 #include <SFML/Window.hpp>
-#include"EntityManager.hpp"
+#include "EntityManager.h"
 #include "ConfigData.hpp"
 #include "AudioData.hpp"
 #include "MovementSystem.h"
@@ -53,7 +53,7 @@ class Game
 	void SetPaused(bool value);;
 	void SEnemySpawner();
 	void SResetGame();
-	Entity* SpawnPlayer();
+	Entity SpawnPlayerEntity();
 	void SpawnEnemy();
 	void SpawnSmallEnemies(Entity& entity);
 	void SpawnBullet(const Vec2f& mousePos);
@@ -64,7 +64,7 @@ class Game
 
 	void CloseWindow();
 
-	Entity* Player();
+	std::optional<Entity> GetPlayerEntity();
 
 public:
 

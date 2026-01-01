@@ -17,15 +17,15 @@ void Game::init()
 
 	AssetManager::Instance().Initialize("./src/media/font.otf");
 
-	SpawnPlayer();
+	SpawnPlayerEntity();
 
-	collisionSystem = std::make_unique<CollisionSystem>(entityManager, Player()->Id());
-	movementSystem = std::make_unique<MovementSystem>(configData, entityManager, Player()->Id());
+	collisionSystem = std::make_unique<CollisionSystem>(entityManager);
+	movementSystem = std::make_unique<MovementSystem>(configData, entityManager);
 	lifeSpanSystem = std::make_unique<LifeSpanSystem>(entityManager);
-	inputSystem = std::make_unique<InputSystem>(window, entityManager, Player()->Id());
+	inputSystem = std::make_unique<InputSystem>(window, entityManager);
 	gridSystem = std::make_unique<GridSystem>(1080, 1920, 60, entityManager);
-	guiSystem = std::make_unique<GUISystem>(entityManager, Player()->Id(),score, *gridSystem);
-	renderSystem = std::make_unique<RenderSystem>(entityManager, Player()->Id(), window,*gridSystem);
+	guiSystem = std::make_unique<GUISystem>(entityManager,score, *gridSystem);
+	renderSystem = std::make_unique<RenderSystem>(entityManager, window,*gridSystem);
 
 	collisionSystem->onPlayerCollisionWithEnemies.Subscribe<Game, &Game::ActionsOnPlayerHitEnemy>(this);
 	collisionSystem->onBulletCollisionWithEnemies.Subscribe<Game, &Game::ActionsOnBulletHitEnemy>(this);
@@ -39,11 +39,11 @@ void Game::init()
 	audioData.PlayMusic(10);
 }
 
-Entity* Game::Player()
+std::optional<Entity> Game::GetPlayerEntity()
 {
 	auto& players = entityManager.GetEntities("Player");
-	if (players.size() <= 0) return nullptr;
-	return players.front().get();
+	if (players.empty()) return std::nullopt;
+	return players.front();
 }
 
 void Game::Run()
@@ -58,10 +58,10 @@ void Game::Run()
 
 		//Game Logic
 		movementSystem->HandleMovementSystem();
-		lifeSpanSystem->HandleLifeSpanSystem();
-		collisionSystem->HandleCollisionSystem();
-		SEnemySpawner();
-		guiSystem->HandleGUI();
+		//lifeSpanSystem->HandleLifeSpanSystem();
+		//collisionSystem->HandleCollisionSystem();
+		//SEnemySpawner();
+		//guiSystem->HandleGUI();
 
 		//Render
 		renderSystem->HandleRenderSystem();
@@ -75,52 +75,64 @@ void Game::SetPaused(bool value)
 
 }
 
-Entity* Game::SpawnPlayer()
+Entity Game::SpawnPlayerEntity()
 {
 	auto player = entityManager.AddEntity("Player");
-	player->Add<CTransform>(Vec2f(configData.windowW / 2, configData.windowH / 2), Vec2f(0, 0), 0.0f, configData.playerSpeed);
-	player->Add<CShape>(configData.playerShapeRadius, configData.playerShapeVer, configData.playerFillColor, configData.playerOutColor, configData.playerOutThickness);
-	player->Add<CInput>();
 
-	return player.get();
+	CTransform& transform = player.Add<CTransform>();
+	transform.pos = Vec2f(configData.windowW / 2, configData.windowH / 2);
+	transform.velocity = Vec2f(0, 0);
+	transform.angle =0.0f;
+	transform.speed = configData.playerSpeed;
+	
+	CShape& shape = player.Add<CShape>();
+	shape.circle.setRadius(configData.playerShapeRadius);
+	shape.circle.setPointCount(configData.playerShapeVer);
+	shape.circle.setFillColor(configData.playerFillColor);
+	shape.circle.setOutlineColor(configData.playerOutColor);
+	shape.circle.setOutlineThickness(configData.playerOutThickness);
+
+	player.Add<CInput>();
+
+	return player;
 }
 
 void Game::SpawnEnemy()
 {
-	//Random Pos
-	int rXpos = configData.enemyShapeRadius + rand() % (configData.windowW - configData.enemyShapeRadius + 1);
-	int rYpos = configData.enemyShapeRadius + rand() % (configData.windowH - configData.enemyShapeRadius + 1);
+	////Random Pos
+	//int rXpos = configData.enemyShapeRadius + rand() % (configData.windowW - configData.enemyShapeRadius + 1);
+	//int rYpos = configData.enemyShapeRadius + rand() % (configData.windowH - configData.enemyShapeRadius + 1);
 
-	//Random Vel
-	int rXVel = -1 + rand() % 3;
-	int rYVel = -1 + rand() % 3;
-	while (rXVel == 0 && rYVel == 0)
-	{
-		rXVel = -1 + rand() % 3;
-		rYVel = -1 + rand() % 3;
-	}
-	//Random Color
-	uint32_t r, g, b;
-	r = rand() % 256;
-	g = rand() % 256;
-	b = rand() % 256;
+	////Random Vel
+	//int rXVel = -1 + rand() % 3;
+	//int rYVel = -1 + rand() % 3;
+	//while (rXVel == 0 && rYVel == 0)
+	//{
+	//	rXVel = -1 + rand() % 3;
+	//	rYVel = -1 + rand() % 3;
+	//}
+	////Random Color
+	//uint32_t r, g, b;
+	//r = rand() % 256;
+	//g = rand() % 256;
+	//b = rand() % 256;
 
-	//Random Ver
-	int rVer = configData.enemyMinShapeVer + rand() % (configData.enemyMaxShapeVer + 1);
+	////Random Ver
+	//int rVer = configData.enemyMinShapeVer + rand() % (configData.enemyMaxShapeVer + 1);
 
-	//Random Speed
-	float rSpeed = configData.enemyMinSpeed + rand() % (configData.enemyMaxSpeed + 1);
+	////Random Speed
+	//float rSpeed = configData.enemyMinSpeed + rand() % (configData.enemyMaxSpeed + 1);
 
-	auto entity = entityManager.AddEntity("Enemy");
-	entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0, rSpeed);
-	entity->Add<CShape>(configData.enemyShapeRadius, rVer, sf::Color(r, g, b), configData.enemyOutColor, 4.0f);
-	entity->Add<CCollision>(configData.enemyCollisionRadius);
+	//auto entity = entityManager.AddEntity("Enemy");
+	//entity->Add<CTransform>(Vec2f(rXpos, rYpos), Vec2f(rXVel, rYVel), 0, rSpeed);
+	//entity->Add<CShape>(configData.enemyShapeRadius, rVer, sf::Color(r, g, b), configData.enemyOutColor, 4.0f);
+	//entity->Add<CCollision>(configData.enemyCollisionRadius);
 }
 
 void Game::SpawnSmallEnemies(Entity& entity)
 {
-	auto& shape = entity.Get<CShape>();
-	auto& transform = entity.Get<CTransform>();
+	/*auto& shape = entity.GetComponent<CShape>();
+	auto& transform = entity.GetComponent<CTransform>();
 	int ver = shape.circle.getPointCount();
 
 	float a = 360 / ver;
@@ -132,29 +144,29 @@ void Game::SpawnSmallEnemies(Entity& entity)
 		auto sEnemy = entityManager.AddEntity("SmallEnemy");
 		sEnemy->Add<CTransform>(transform.pos, vel, 0, transform.speed);
 		sEnemy->Add<CShape>(shape.circle.getRadius() / 2, shape.circle.getPointCount(), shape.circle.getFillColor(), shape.circle.getOutlineColor(), shape.circle.getOutlineThickness() / 2);
-		sEnemy->Add<CCollision>(entity.Get<CCollision>().radius / 2);
+		sEnemy->Add<CCollision>(entity.GetComponent<CCollision>().radius / 2);
 		sEnemy->Add<CLifeSpan>(configData.smallEnemyLifeSpan);
-	}
+	}*/
 }
 
 void Game::SpawnBullet(const Vec2f& mousePos)
 {
-	auto player = Player();
+	/*auto player = GetPlayerID();
 	if (!player) return;
 
 	auto bullet = entityManager.AddEntity("Bullet");
-	Vec2f velocity = mousePos - player->Get<CTransform>().pos;
-	bullet->Add<CTransform>(Player()->Get<CTransform>().pos, velocity, 0, configData.bulletSpeed);
+	Vec2f velocity = mousePos - player->GetComponent<CTransform>().pos;
+	bullet->Add<CTransform>(GetPlayerID()->GetComponent<CTransform>().pos, velocity, 0, configData.bulletSpeed);
 	bullet->Add<CShape>(configData.bulletShapeRadius, configData.bulletShapeVer, configData.bulletFillColor, configData.bulletOutColor, configData.bulletOutThickness);
 	bullet->Add<CCollision>(configData.bulletCollisionRadius);
 	bullet->Add<CLifeSpan>(configData.bulletLifeSpan);
 
-	audioData.PlayShootSFX(200);
+	audioData.PlayShootSFX(200);*/
 }
 void Game::ActionsOnPlayerHitEnemy(Entity& enemy)
 {
 	enemy.Destroy();
-	Player()->Destroy();
+	GetPlayerEntity()->Destroy();
 	audioData.PlayDeathSFX(15);
 }
 
@@ -195,14 +207,9 @@ void Game::SResetGame()
 {
 	for (auto& entity : entityManager.GetEntities())
 	{
-		entity->Destroy();
+		entity.Destroy();
 	}
-	Entity* newPlayer = SpawnPlayer();
+	Entity newPlayer = SpawnPlayerEntity();
 
 	score = 0;
-	collisionSystem->ResetPlayer(newPlayer);
-	movementSystem->ResetPlayer(newPlayer);
-	guiSystem->ResetPlayer(newPlayer);
-	inputSystem->ResetPlayer(newPlayer);
-	renderSystem->ResetPlayer(newPlayer);
 }

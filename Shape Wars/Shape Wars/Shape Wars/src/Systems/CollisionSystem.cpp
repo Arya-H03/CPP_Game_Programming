@@ -3,14 +3,14 @@
 
 void CollisionSystem::HandleBulletCollision()
 {
-	for (auto& bullet : entityManager.GetEntities("Bullet"))
+	/*for (auto& bullet : entityManager.GetEntities("Bullet"))
 	{
-		auto& bTransform = bullet->Get<CTransform>();
-		auto& bCollision = bullet->Get<CCollision>();
+		auto& bTransform = bullet->GetComponent<CTransform>();
+		auto& bCollision = bullet->GetComponent<CCollision>();
 		for (auto& enemy : entityManager.GetEntities("Enemy"))
 		{
-			auto& eTransform = enemy->Get<CTransform>();
-			auto& eCollision = enemy->Get<CCollision>();
+			auto& eTransform = enemy->GetComponent<CTransform>();
+			auto& eCollision = enemy->GetComponent<CCollision>();
 
 			if (bTransform.pos.Dist(eTransform.pos) < abs(bCollision.radius - eCollision.radius))
 			{
@@ -20,30 +20,30 @@ void CollisionSystem::HandleBulletCollision()
 
 		for (auto& enemy : entityManager.GetEntities("SmallEnemy"))
 		{
-			auto& eTransform = enemy->Get<CTransform>();
-			auto& eCollision = enemy->Get<CCollision>();
+			auto& eTransform = enemy->GetComponent<CTransform>();
+			auto& eCollision = enemy->GetComponent<CCollision>();
 
 			if (bTransform.pos.Dist(eTransform.pos) < abs(bCollision.radius - eCollision.radius))
 			{
 				onBulletCollisionWithSmallEnemy.Invoke(*bullet.get(), *enemy.get());
 			}
 		}
-	}
+	}*/
 }
 
 void CollisionSystem::HandlePlayerCollision()
 {
-	Entity* player = entityManager.FindEntityByID(playerID);
+	/*Entity* player = entityManager.FindEntityByID(playerID);
 	if (!player) return;
 
-	auto& pTransform = player->Get<CTransform>();
-	auto& pCollision = player->Get<CCollision>();
+	auto& pTransform = player->GetComponent<CTransform>();
+	auto& pCollision = player->GetComponent<CCollision>();
 
 	for (auto& enemy : entityManager.GetEntities("Enemy"))
 	{
 		
-		auto& eTransform = enemy->Get<CTransform>();
-		auto& eCollision = enemy->Get<CCollision>();
+		auto& eTransform = enemy->GetComponent<CTransform>();
+		auto& eCollision = enemy->GetComponent<CCollision>();
 		
 		if (pTransform.pos.Dist(eTransform.pos) < abs(pCollision.radius - eCollision.radius))
 		{
@@ -54,24 +54,19 @@ void CollisionSystem::HandlePlayerCollision()
 
 	for (auto& smallEnemy : entityManager.GetEntities("SmallEnemy"))
 	{
-		auto& eTransform = smallEnemy->Get<CTransform>();
-		auto& eCollision = smallEnemy->Get<CCollision>();
+		auto& eTransform = smallEnemy->GetComponent<CTransform>();
+		auto& eCollision = smallEnemy->GetComponent<CCollision>();
 
 		if (pTransform.pos.Dist(eTransform.pos) < abs(pCollision.radius - eCollision.radius))
 		{
 			onPlayerCollisionWithEnemies.Invoke(*smallEnemy.get());
 		}
-	}
+	}*/
 }
 
 void CollisionSystem::HandleCollisionSystem()
 {
 	HandleBulletCollision();
 	HandlePlayerCollision();
-}
-
-void CollisionSystem::ResetPlayer(Entity* newPlayer)
-{
-	playerID = newPlayer->Id();
 }
 
