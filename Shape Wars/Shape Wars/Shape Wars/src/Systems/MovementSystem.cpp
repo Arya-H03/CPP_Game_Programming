@@ -4,9 +4,10 @@ void MovementSystem::HandleMovementSystem()
 {
 	for (Entity entity : entityManager.GetEntities())
 	{
-		if (!entity.HasComponent<CTransform>()) continue;
+		if (!entity.HasComponent<CTransform>() || !entity.HasComponent<CShape>()) continue;
 
 		CTransform& transform = entity.GetComponent<CTransform>();
+		CShape& shape = entity.GetComponent<CShape>();
 
 		if (entity.HasComponent<CInput>())
 		{
@@ -16,28 +17,23 @@ void MovementSystem::HandleMovementSystem()
 			transform.velocity.x = input.right - input.left;
 		}
 
-		if (transform.velocity != Vec2<float>::Zero) transform.velocity = transform.velocity.Normalize();
-
-		if ((transform.pos.y - configData.playerShapeRadius <= 0 && transform.velocity.y < 0) || transform.pos.y + configData.playerShapeRadius >= configData.windowH && transform.velocity.y > 0)
+		if ((transform.pos.y - shape.circle.getRadius() <= 0 && transform.velocity.y < 0) || transform.pos.y + shape.circle.getRadius() >= configData.windowH && transform.velocity.y > 0)
 		{
 			transform.velocity.y = 0;
 		}
 
-		if ((transform.pos.x - configData.playerShapeRadius <= 0 && transform.velocity.x < 0) || (transform.pos.x + configData.playerShapeRadius >= configData.windowW && transform.velocity.x > 0))
+		if ((transform.pos.x - shape.circle.getRadius() <= 0 && transform.velocity.x < 0) || (transform.pos.x + shape.circle.getRadius() >= configData.windowW && transform.velocity.x > 0))
 		{
 			transform.velocity.x = 0;
 		}
 
+		transform.velocity = transform.velocity.Normalize();
+
 		transform.pos += transform.velocity * transform.speed;
 		transform.angle += 1.0f;
 
-		if (entity.HasComponent<CShape>())
-		{
-			CShape& shape = entity.GetComponent<CShape>();
-
-			shape.circle.setPosition(transform.pos);
-			shape.circle.setRotation(sf::degrees(transform.angle));
-		}
+		shape.circle.setPosition(transform.pos);
+		shape.circle.setRotation(sf::degrees(transform.angle));
 
 	}
 

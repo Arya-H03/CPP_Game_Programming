@@ -1,6 +1,7 @@
 #pragma once
 #include "Vec2.hpp"
 #include <SFML/Graphics.hpp>
+#include "TypeUtils.hpp"
 
 
 class Component
@@ -109,3 +110,12 @@ public:
 		cText->setPosition(parentPos + offsetFromParent);
 	}
 };
+
+REGISTER_TYPE(CTransform)
+REGISTER_TYPE(CShape)
+REGISTER_TYPE(CCollision)
+REGISTER_TYPE(CScore)
+REGISTER_TYPE(CLifeSpan)
+REGISTER_TYPE(CInput)
+REGISTER_TYPE(CCoord)
+REGISTER_TYPE(CText)

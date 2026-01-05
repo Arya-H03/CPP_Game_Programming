@@ -63,3 +63,8 @@ bool EntityMemoryPool::IsEntityActive(size_t entityID)
 {
 	return m_active[entityID];
 }
+
+const EntityComponentVectorTuple& EntityMemoryPool::GetComponentPool() const
+{
+	return m_componentPool;
+}

@@ -16,6 +16,8 @@ typedef std::tuple<
 
 > EntityComponentVectorTuple;
 
+
+
 class Entity;
 
 class EntityMemoryPool
@@ -48,6 +50,8 @@ public:
 	void DestroyEntity(size_t entityID);
 
 	bool IsEntityActive(size_t entityID);
+
+	const EntityComponentVectorTuple& GetComponentPool()const;
 
 };
 

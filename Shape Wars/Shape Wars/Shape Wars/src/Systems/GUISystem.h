@@ -14,6 +14,12 @@ private:
 	size_t playerID;
 	int& score;
 
+	static inline const ImVec4 idColor {225,0,0,225};
+	static inline const ImVec4 addressColor {0,0,255,225};
+	static inline const ImVec4 sizeColor {255,255,0,225};
+
+	void DrawEntitiesTab();
+	void DrawComponentsTab();
 
 public:
 
@@ -22,6 +28,5 @@ public:
 	GUISystem(EntityManager& entityManager ,int& score, GridSystem& gridSystem):m_entityManager(entityManager),score(score),m_gridSystem(gridSystem){}
 
 	void HandleGUI();
-	void ResetPlayer(Entity* player);
 };
 

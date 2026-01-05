@@ -18,6 +18,11 @@ void Game::init()
 	AssetManager::Instance().Initialize("./src/media/font.otf");
 
 	SpawnPlayerEntity();
+	SpawnPlayerEntity();
+	SpawnPlayerEntity();
+	SpawnPlayerEntity();
+	SpawnPlayerEntity();
+	SpawnPlayerEntity();
 
 	collisionSystem = std::make_unique<CollisionSystem>(entityManager);
 	movementSystem = std::make_unique<MovementSystem>(configData, entityManager);
@@ -61,7 +66,7 @@ void Game::Run()
 		//lifeSpanSystem->HandleLifeSpanSystem();
 		//collisionSystem->HandleCollisionSystem();
 		//SEnemySpawner();
-		//guiSystem->HandleGUI();
+		guiSystem->HandleGUI();
 
 		//Render
 		renderSystem->HandleRenderSystem();
@@ -82,11 +87,12 @@ Entity Game::SpawnPlayerEntity()
 	CTransform& transform = player.Add<CTransform>();
 	transform.pos = Vec2f(configData.windowW / 2, configData.windowH / 2);
 	transform.velocity = Vec2f(0, 0);
-	transform.angle =0.0f;
+	transform.angle = 0.0f;
 	transform.speed = configData.playerSpeed;
 	
 	CShape& shape = player.Add<CShape>();
 	shape.circle.setRadius(configData.playerShapeRadius);
+	shape.circle.setOrigin({ (float)configData.playerShapeRadius, (float)configData.playerShapeRadius });
 	shape.circle.setPointCount(configData.playerShapeVer);
 	shape.circle.setFillColor(configData.playerFillColor);
 	shape.circle.setOutlineColor(configData.playerOutColor);
