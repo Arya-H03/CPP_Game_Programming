@@ -12,8 +12,8 @@ private:
 	GridSystem& m_gridSystem;	
 	sf::RenderWindow& window;
 	
-	void RenderPlayer();
-	void RenderBullets();
+	void RenderShapes();
+	void RenderText();
 	void RenderSmallEnemies();
 	void RenderEnemeis();
 	void RenderGUI();

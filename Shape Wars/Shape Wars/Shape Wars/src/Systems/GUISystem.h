@@ -20,6 +20,7 @@ private:
 
 	void DrawEntitiesTab();
 	void DrawComponentsTab();
+	void DrawDebugTab();
 
 public:
 

@@ -1,20 +1,24 @@
 #include "RenderSystem.h"
 
-void RenderSystem::RenderPlayer()
+void RenderSystem::RenderShapes()
 {
-	for (Entity entity : m_entityManager.GetEntities())
+	for (auto& comp : EntityMemoryPool::Instance().GetComponentVector<CShape>())
 	{
-		if (!entity.HasComponent<CShape>()) continue;
+		if (!comp.exists || !comp.canRender) continue;
 
-		CShape& shape = entity.GetComponent<CShape>();
-
-		window.draw(shape.circle);
+		window.draw(comp.circle);
 	}
-		
 }
 
-void RenderSystem::RenderBullets()
+void RenderSystem::RenderText()
 {
+	for (auto& comp : EntityMemoryPool::Instance().GetComponentVector<CText>())
+	{
+		if (!comp.exists || !comp.canRender) continue;
+
+		window.draw(*comp.cText);
+	}
+
 	/*for (auto& bullet : m_entityManager.GetEntities("Bullet"))
 	{
 		auto& shape = bullet->Get<CShape>();
@@ -99,8 +103,8 @@ void RenderSystem::HandleRenderSystem()
 {
 	window.clear();
 
-	RenderPlayer();
-	RenderBullets();
+	RenderShapes();
+	RenderText();
 	RenderSmallEnemies();
 	RenderEnemeis();
 	RenderCells();

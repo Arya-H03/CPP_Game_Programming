@@ -12,9 +12,9 @@ private:
 	size_t m_cellPerCol;
 	size_t m_cellPerRow;
 	float m_cellRadius;
-	bool m_renderCells = false;
+	bool m_canRenderCells = false;
 
-	std::vector<std::vector<Entity*>> cells;
+	std::vector<std::vector<Entity>> cells;
 
 	EntityManager& m_entityManager;
 	
@@ -25,8 +25,8 @@ private:
 public:
 
 	GridSystem(size_t width, size_t height, size_t cellSize, EntityManager& entityManager);
-	bool GetRenderCells();
-	void SetRenderCells(bool newVal);
+
+	void ToggleCellsToRender();
 
 };
 

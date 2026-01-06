@@ -53,5 +53,11 @@ public:
 
 	const EntityComponentVectorTuple& GetComponentPool()const;
 
+	template<typename T>
+	const std::vector<T> GetComponentVector()
+	{
+		return std::get<std::vector<T>>(m_componentPool);
+	}
+
 };
 

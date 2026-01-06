@@ -85,18 +85,10 @@ Entity Game::SpawnPlayerEntity()
 	auto player = entityManager.AddEntity("Player");
 
 	CTransform& transform = player.Add<CTransform>();
-	transform.pos = Vec2f(configData.windowW / 2, configData.windowH / 2);
-	transform.velocity = Vec2f(0, 0);
-	transform.angle = 0.0f;
-	transform.speed = configData.playerSpeed;
+	transform.Init(Vec2f(configData.windowW / 2, configData.windowH / 2), Vec2f(0, 0), 0.0f, configData.playerSpeed);
 	
 	CShape& shape = player.Add<CShape>();
-	shape.circle.setRadius(configData.playerShapeRadius);
-	shape.circle.setOrigin({ (float)configData.playerShapeRadius, (float)configData.playerShapeRadius });
-	shape.circle.setPointCount(configData.playerShapeVer);
-	shape.circle.setFillColor(configData.playerFillColor);
-	shape.circle.setOutlineColor(configData.playerOutColor);
-	shape.circle.setOutlineThickness(configData.playerOutThickness);
+	shape.Init(configData.playerShapeRadius, configData.playerShapeVer, configData.playerFillColor, configData.playerOutColor, configData.playerOutThickness);
 
 	player.Add<CInput>();
 

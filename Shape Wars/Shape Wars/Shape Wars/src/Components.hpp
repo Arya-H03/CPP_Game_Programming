@@ -21,7 +21,13 @@ public:
 	float speed = 0;
 
 	CTransform() = default;
-	CTransform(const Vec2f& p, const Vec2f& v, float a, float s) :pos(p), velocity(v), angle(a), speed(s) {}
+	void Init(const Vec2f& p, const Vec2f& v, float a, float s)
+	{
+		pos = p;
+		velocity = v;
+		angle = a;
+		speed = s;
+	};
 };
 
 class CShape : public Component
@@ -29,12 +35,13 @@ class CShape : public Component
 public:
 
 	sf::CircleShape circle;
-
+	bool canRender = true;
 
 	CShape() = default;
-	CShape(float radius, size_t points, const sf::Color& fillColor, const sf::Color& outlineColor, float outlineThickness)
-		:circle(radius, points)
-	{
+	void Init(float radius, size_t points, const sf::Color& fillColor, const sf::Color& outlineColor, float outlineThickness)
+	{	
+		circle.setRadius(radius);
+		circle.setPointCount(points);
 		circle.setFillColor(fillColor);
 		circle.setOutlineColor(outlineColor);
 		circle.setOutlineThickness(outlineThickness);
@@ -49,7 +56,10 @@ public:
 	float radius = 0;
 
 	CCollision() = default;
-	CCollision(float r) : radius(r) {}
+	void Init(float radius)
+	{
+		this->radius = radius;
+	}
 };
 
 class CScore : public Component
@@ -59,7 +69,10 @@ public:
 	int score = 0;
 
 	CScore() = default;
-	CScore(int s) : score(s) {}
+	void Init(int score)
+	{
+		this->score = score;
+	}
 };
 
 class CLifeSpan : public Component
@@ -70,7 +83,11 @@ public:
 	int remaining = 0;
 
 	CLifeSpan() = default;
-	CLifeSpan(int totalLifeSpan) : lifeSpan(totalLifeSpan), remaining(totalLifeSpan) {}
+	void Init(int totalLifeSpan)
+	{
+		this->lifeSpan = totalLifeSpan;
+		this->remaining = totalLifeSpan;
+	}
 };
 
 class CInput : public Component
@@ -93,7 +110,10 @@ public:
 	Vec2<int> coord;
 
 	CCoord() = default;
-	CCoord(const Vec2<int>& coord) : coord(coord) {}
+	void Init(const Vec2<int>& coord)
+	{
+		this->coord = coord;
+	}
 };
 
 class CText : public Component
@@ -101,10 +121,12 @@ class CText : public Component
 public:
 
 	std::shared_ptr<sf::Text> cText;
+	bool canRender = true;
 	
 	CText() = default;
-	CText(const sf::Font& textFont, const std::string& textContent, int textSize, const Vec2f& parentPos,const Vec2f& offsetFromParent, const sf::Color& textColor)
-	{
+	
+	void Init(const sf::Font& textFont, const std::string& textContent, int textSize, const Vec2f& parentPos, const Vec2f& offsetFromParent, const sf::Color& textColor)
+	{		
 		cText = std::make_shared<sf::Text>(textFont, textContent, textSize);
 		cText->setFillColor(textColor);
 		cText->setPosition(parentPos + offsetFromParent);

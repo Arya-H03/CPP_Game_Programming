@@ -33,7 +33,7 @@ void MovementSystem::HandleMovementSystem()
 		transform.angle += 1.0f;
 
 		shape.circle.setPosition(transform.pos);
-		shape.circle.setRotation(sf::degrees(transform.angle));
+		//shape.circle.setRotation(sf::degrees(transform.angle));
 
 	}
 

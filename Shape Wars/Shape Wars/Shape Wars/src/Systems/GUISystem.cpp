@@ -129,7 +129,7 @@ void GUISystem::HandleGUI()
 		
 		DrawEntitiesTab();
 		DrawComponentsTab();
-		
+		DrawDebugTab();
 
 		ImGui::EndTabBar();
 	}
@@ -197,6 +197,23 @@ void GUISystem::DrawComponentsTab()
 
 			}, EntityMemoryPool::Instance().GetComponentPool());
 
+
+		ImGui::EndTabItem();
+	}
+}
+
+void GUISystem::DrawDebugTab()
+{
+	if (ImGui::BeginTabItem("Debug"))
+	{
+		int clicked = 0;
+		if (ImGui::Button("Visualize Cells")) clicked++;
+
+		if (clicked & 1)
+		{
+			m_gridSystem.ToggleCellsToRender();
+			clicked = 0;
+		}
 
 		ImGui::EndTabItem();
 	}
